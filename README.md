@@ -13,30 +13,30 @@ This application is split into two isolated services to ensure a clean separatio
 
 ## 📚 Documentation
 Detailed documentation is split into dedicated files:
-* [Local Setup & Installation](https://github.com/Divyam1202/recipe-generator-ai/setup.md)
+* [Local Setup & Installation](https://github.com/Divyam1202/recipe-generator-ai/blob/main/setup.md)
 
 ## 🛣️ Roadmap
 - Phase 1: Data & Model Engineering (Python)
-[ ] Data Extraction: Develop Python scripts to scrape and clean raw text from PDF/eBook sources.
-[ ] Dataset Preparation: Convert cleaned text into structured .jsonl files for LLM fine-tuning.
-[ ] Model Training: Fine-tune Llama 3/Mistral on custom culinary datasets using Unsloth/HuggingFace.
-[ ] Inference Optimization: Implement GGUF quantization for faster local response times.
+-- [] Data Extraction: Develop Python scripts to scrape and clean raw text from PDF/eBook sources.
+-- [] Dataset Preparation: Convert cleaned text into structured .jsonl files for LLM fine-tuning.
+-- [] Model Training: Fine-tune Llama 3/Mistral on custom culinary datasets using Unsloth/HuggingFace.
+-- [] Inference Optimization: Implement GGUF quantization for faster local response times.
 
 - Phase 2: Full-Stack Integration
-[ ] API Logic: Connect the fine-tuned model to the FastAPI POST /generate endpoint.
-[ ] CORS & Security: Configure middleware to allow secure communication between services.
-[ ] State Management: Implement LocalStorage in React to persist user recipe history.
-[ ] Error Handling: Add robust try/except blocks for API timeouts and model inference failures.
+-- [] API Logic: Connect the fine-tuned model to the FastAPI POST /generate endpoint.
+-- [] CORS & Security: Configure middleware to allow secure communication between services.
+-- [] State Management: Implement LocalStorage in React to persist user recipe history.
+-- [] Error Handling: Add robust try/except blocks for API timeouts and model inference failures.
 
 - Phase 3: Containerization & DevOps
-[ ] Dockerization: Write Dockerfiles for both Frontend and Backend to ensure environment parity.
-[ ] Orchestration: Use docker-compose to launch the entire stack with a single command.
-[ ] Environment Control: Standardize .env management across local and production builds.
+-- [] Dockerization: Write Dockerfiles for both Frontend and Backend to ensure environment parity.
+-- [] Orchestration: Use docker-compose to launch the entire stack with a single command.
+-- [] Environment Control: Standardize .env management across local and production builds.
 
 - Phase 4: Deployment & Scaling
-[ ] Backend (Render): Deploy the FastAPI server with a persistent disk for model weights.
-[ ] Frontend (Vercel): Deploy the React/Vite UI to Vercel for global edge-network delivery.
-[ ] Automated CI/CD: Set up GitHub Actions to trigger deployments on every successful Pull Request merge.
+-- [] Backend (Render): Deploy the FastAPI server with a persistent disk for model weights.
+-- [] Frontend (Vercel): Deploy the React/Vite UI to Vercel for global edge-network delivery.
+-- [] Automated CI/CD: Set up GitHub Actions to trigger deployments on every successful Pull Request merge.
 
 ## 📝 License
 This project is available under the MIT License.
