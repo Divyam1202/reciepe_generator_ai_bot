@@ -6,18 +6,19 @@ To run this project locally, you must run both the Python FastAPI backend and th
 
 Create `.env` files in both the frontend and backend directories before starting the servers.
 
-### Backend (`backend/.env`)
+## Backend (`backend/.env`)
 ```env
 PORT=8000
 MODEL_PATH=./models/finalmodel
 UNSPLASH_ACCESS_KEY=your_unsplash_api_key
 Frontend (frontend/.env)
 VITE_API_BASE_URL=http://127.0.0.1:8000
-2. Server Initialization
+
+## 2. Server Initialization
 
 Run backend and frontend in separate terminals.
 
-Backend (FastAPI)
+### Backend (FastAPI)
 cd backend
 python -m venv venv
 
@@ -28,18 +29,18 @@ venv\Scripts\activate
 source venv/bin/activate
 
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+In root folder run: uvicorn app.main:app --reload
 
 Backend: http://127.0.0.1:8000
 
-Frontend (React + Vite)
+### Frontend (React + Vite)
 cd frontend
 npm install
 npm run dev
 
 Frontend: http://localhost:5173
 
-3. API Contract
+## 3. API Contract
 POST /generate
 Headers
 Content-Type: application/json
@@ -54,7 +55,8 @@ Response (200)
 Errors
 422 → Invalid/missing ingredients
 500 → Model failure
-4. FastAPI Implementation
+
+## 4. FastAPI Implementation
 
 Put this in backend/app/main.py:
 
