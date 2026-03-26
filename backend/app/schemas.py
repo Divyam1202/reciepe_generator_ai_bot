@@ -1,9 +1,9 @@
-from pydantic import BaseModel
-from typing import List, Optional
+from pydantic import BaseModel, Field
+from typing import List
 
 
 class RecipeRequest(BaseModel):
-    ingredients: str
+    ingredients: str = Field(..., min_length=1, max_length=2000, description="Ingredients for the recipe")
 
 
 class RecipeResponse(BaseModel):
@@ -24,10 +24,10 @@ class ConversationModel(BaseModel):
 
 
 class SaveConversationRequest(BaseModel):
-    id: str
-    title: str
+    id: str = Field(..., min_length=1)
+    title: str = Field(..., min_length=1, max_length=500)
     messages: List[dict]
 
 
 class DeleteConversationRequest(BaseModel):
-    id: str
+    id: str = Field(..., min_length=1)

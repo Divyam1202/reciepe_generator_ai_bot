@@ -1,86 +1,19 @@
 {
-  "1774432116639": {
-    "id": "1774432116639",
-    "title": "cheese, carrot, mustar...",
+  "1774510752013": {
+    "id": "1774510752013",
+    "title": "Cheese, carrot, mustar...",
     "messages": [
       {
-        "id": 1774432116639,
+        "id": 1774510752013,
         "type": "user",
-        "content": "Cook veg lasagna with cheese, carrot, mustard sauce, honey, bell peppers, broccoli, mushroom, corn, baby corn, panner, cream, beetroot sauce"
+        "content": "Cheese, carrot, mustard sauce, honey, bell peppers, broccoli, mushroom, corn, baby corn, panner, cream, beetroot sauce calories 200 and protein 50g"
       },
       {
-        "id": 1774432210358,
+        "id": 1774510783454,
         "type": "ai",
-        "content": "Include a list of ingredients, measurements, and cooking times to ensure accuracy. Use clear and concise language, avoiding jargon or technical terms. Consider adding photos or illustrations to enhance the recipe's visual appeal."
-      },
-      {
-        "id": 1774432250567,
-        "type": "user",
-        "content": "Given the meal and ingredients:  veg lasagna with cheese, carrot, mustard sauce, honey, bell peppers, broccoli, mushroom, corn, baby corn, panner, cream, beetroot sauce"
-      },
-      {
-        "id": 1774432262079,
-        "type": "ai",
-        "content": "Use clear and concise language, and avoid using technical jargon or complex terms. Be sure to include nutritional information and any substitutions or modifications for dietary restrictions."
-      },
-      {
-        "id": 1774432271832,
-        "type": "user",
-        "content": "cheese, carrot, mustard sauce, honey, bell peppers, broccoli, mushroom, corn, baby corn, panner, cream, beetroot sauce"
-      },
-      {
-        "id": 1774432279838,
-        "type": "ai",
-        "content": "Include nutritional information (calories, carbs, fat, etc.) and any serving suggestions or substitutions."
-      },
-      {
-        "id": 1774432296866,
-        "type": "user",
-        "content": "serving portions one portion"
-      },
-      {
-        "id": 1774432305785,
-        "type": "ai",
-        "content": "Use clear and concise language and avoid jargon or technical terms. Consider including photos or illustrations to enhance the visual appeal of the recipe."
-      },
-      {
-        "id": 1774432317233,
-        "type": "user",
-        "content": "calories 200"
-      },
-      {
-        "id": 1774432325061,
-        "type": "ai",
-        "content": "Include nutritional information and any serving suggestions. Use descriptive language to create an immersive dining experience."
-      },
-      {
-        "id": 1774432355671,
-        "type": "user",
-        "content": "cheese, carrot, mustard sauce, honey, bell peppers, broccoli, mushroom, corn, baby corn, panner, cream, beetroot sauce calories 200 and protein 50g add ingredients that compliment it"
-      },
-      {
-        "id": 1774432362617,
-        "type": "ai",
-        "content": "Use descriptive language to make the recipe more engaging and visually appealing."
+        "content": "You are an expert professional chef. Create a COMPLETE and DETAILED recipe using these ingredients:\nCheese, carrot, mustard sauce, honey, bell peppers, broccoli, mushroom, corn, baby corn, panner, cream, beetroot sauce calories 200 and protein 50g\n\nIMPORTANT: You MUST include ALL these sections in your response:\n\n1. RECIPE TITLE - Give an appealing name for this dish\n\n2. PREP TIME - [X minutes]\n   COOK TIME - [X minutes]\n   SERVINGS - [Number]\n\n3. INGREDIENTS LIST - Include all components with EXACT quantities in both metric (grams, ml) AND imperial (oz, cups) units. List each ingredient on a new line with bullet point or dash\n\n4. STEP-BY-STEP COOKING INSTRUCTIONS - Number each step (1, 2, 3, etc). Provide 5-7 DETAILED steps explaining:\n   - What to do\n   - How long it takes\n   - Cooking temperature if needed\n   - Visual cues to know when it's done\n\n5. SERVING TIPS - Include:\n   - How to plate/serve the dish\n   - Optional garnishes\n   - Suggested side dishes\n   - Storage instructions\n   - Possible variations\n\nUse descriptive, appetizing language. Make the reader want to cook this! \n\nNow write the complete detailed recipe with ALL sections: 1-6 above. Use clear and concise language that is easy to follow. Remember, you don't need to make every detail exact; just give enough information so that someone can easily replicate your recipes at home."
       }
     ],
-    "updatedAt": "2026-03-25T15:22:42.625668"
-  },
-  "1774432371328": {
-    "id": "1774432371328",
-    "title": "cheese, carrot, mustar...",
-    "messages": [
-      {
-        "id": 1774432371328,
-        "type": "user",
-        "content": "cheese, carrot, mustard sauce, honey, bell peppers, broccoli, mushroom, corn, baby corn, panner, cream, beetroot sauce calories 200 and protein 50g add ingredients that compliment it"
-      },
-      {
-        "id": 1774432382962,
-        "type": "ai",
-        "content": "Use descriptive language and vivid imagery to make the dish look and taste delicious. Use clear and concise language, and avoid jargon or technical terms."
-      }
-    ],
-    "updatedAt": "2026-03-25T15:23:02.969002"
+    "updatedAt": "2026-03-26T13:09:43.478099"
   }
 }

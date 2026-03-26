@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from .recipe_engine import generate_recipe
 from .history import save_conversation, delete_conversation, get_all_conversations, clear_all_history, get_conversation
@@ -13,60 +13,96 @@ class RecipeRequest(BaseModel):
 
 @router.post("/generate")
 def generate(data: RecipeRequest):
-
-    prompt = f"""Create a detailed and delicious recipe using the following ingredients or requirements:
+    """Generate a detailed recipe from ingredients with all required sections."""
+    try:
+        # Enhanced prompt ensuring all sections are included
+        prompt = f"""You are an expert professional chef. Create a COMPLETE and DETAILED recipe using these ingredients:
 {data.ingredients}
 
-Please provide:
-1. Recipe Title
-2. Prep Time and Cook Time
-3. Servings
-4. Detailed Ingredients List with quantities
-5. Step-by-step Cooking Instructions (at least 5-7 detailed steps)
-6. Tips for serving and variations
+IMPORTANT: You MUST include ALL these sections in your response:
 
-Format the recipe clearly and make the instructions easy to follow."""
+1. RECIPE TITLE - Give an appealing name for this dish
 
-    recipe = generate_recipe(prompt)
-    
-    # Clean up the recipe by removing the original prompt if present
-    if "Create a detailed" in recipe:
-        recipe = recipe.split("Create a detailed")[1]
-    
-    return {"recipe": recipe.strip()}
+2. PREP TIME - [X minutes]
+   COOK TIME - [X minutes]
+   SERVINGS - [Number]
+
+3. INGREDIENTS LIST - Include all components with EXACT quantities in both metric (grams, ml) AND imperial (oz, cups) units. List each ingredient on a new line with bullet point or dash
+
+4. STEP-BY-STEP COOKING INSTRUCTIONS - Number each step (1, 2, 3, etc). Provide 5-7 DETAILED steps explaining:
+   - What to do
+   - How long it takes
+   - Cooking temperature if needed
+   - Visual cues to know when it's done
+
+5. SERVING TIPS - Include:
+   - How to plate/serve the dish
+   - Optional garnishes
+   - Suggested side dishes
+   - Storage instructions
+   - Possible variations
+
+Use descriptive, appetizing language. Make the reader want to cook this! 
+
+Now write the complete detailed recipe with ALL sections:"""
+
+        recipe = generate_recipe(prompt)
+        
+        return {"recipe": recipe}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate recipe: {str(e)}")
 
 
 @router.post("/save-conversation")
 def save_conv(data: SaveConversationRequest):
     """Save or update a conversation."""
-    conversation = save_conversation(data.id, data.title, data.messages)
-    return conversation
+    try:
+        conversation = save_conversation(data.id, data.title, data.messages)
+        return conversation
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save conversation: {str(e)}")
 
 
 @router.post("/delete-conversation")
 def delete_conv(data: DeleteConversationRequest):
     """Delete a conversation."""
-    success = delete_conversation(data.id)
-    return {"success": success}
+    try:
+        success = delete_conversation(data.id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        return {"success": success}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete conversation: {str(e)}")
 
 
 @router.get("/history")
 def get_history():
     """Get all conversations."""
-    return get_all_conversations()
+    try:
+        return get_all_conversations()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load history: {str(e)}")
 
 
 @router.get("/history/{conversation_id}")
 def get_hist(conversation_id: str):
     """Get a specific conversation."""
-    conversation = get_conversation(conversation_id)
-    if not conversation:
-        return {"error": "Conversation not found"}, 404
-    return conversation
+    try:
+        conversation = get_conversation(conversation_id)
+        if not conversation:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        return conversation
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load conversation: {str(e)}")
 
 
 @router.post("/clear-history")
 def clear_hist():
     """Clear all conversation history."""
-    clear_all_history()
-    return {"success": True}
+    try:
+        clear_all_history()
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to clear history: {str(e)}")
