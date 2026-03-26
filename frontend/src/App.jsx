@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./index.css";
+import { apiCall, API_URL } from "./api";
 
 const STORAGE_KEY = "chef-ai-history";
 
@@ -73,23 +74,33 @@ export default function App() {
   }, [messages, loading, error]);
 
   useEffect(() => {
-    const savedState = window.localStorage.getItem(STORAGE_KEY);
-    if (!savedState) return;
-    try {
-      const parsed = JSON.parse(savedState);
-      const savedConversations = parsed.conversations ?? [];
-      const savedConversationId = parsed.currentConversationId ?? null;
-      setConversations(savedConversations);
-      if (savedConversationId) {
-        const activeConversation = savedConversations.find((c) => c.id === savedConversationId);
-        if (activeConversation) {
-          setCurrentConversationId(savedConversationId);
-          setMessages(activeConversation.messages ?? []);
+    const loadHistoryFromBackend = async () => {
+      try {
+        const data = await apiCall("/history");
+        setConversations(data || []);
+      } catch (err) {
+        console.error("Failed to load history from backend:", err);
+        // Fallback to localStorage
+        const savedState = window.localStorage.getItem(STORAGE_KEY);
+        if (!savedState) return;
+        try {
+          const parsed = JSON.parse(savedState);
+          const savedConversations = parsed.conversations ?? [];
+          const savedConversationId = parsed.currentConversationId ?? null;
+          setConversations(savedConversations);
+          if (savedConversationId) {
+            const activeConversation = savedConversations.find((c) => c.id === savedConversationId);
+            if (activeConversation) {
+              setCurrentConversationId(savedConversationId);
+              setMessages(activeConversation.messages ?? []);
+            }
+          }
+        } catch (storageErr) {
+          console.error("Storage parse error:", storageErr);
         }
       }
-    } catch (err) {
-      console.error("Storage parse error:", err);
-    }
+    };
+    loadHistoryFromBackend();
   }, []);
 
   useEffect(() => {
@@ -118,14 +129,24 @@ export default function App() {
   }, []);
 
   const syncConversation = (conversationId, nextMessages, fallbackTitle) => {
+    const title = fallbackTitle;
     setConversations((prev) => {
       const existing = prev.find((c) => c.id === conversationId);
-      if (!existing) {
-        return [{ id: conversationId, title: fallbackTitle, messages: nextMessages, updatedAt: new Date().toISOString() }, ...prev];
-      }
-      return prev.map((c) =>
-        c.id === conversationId ? { ...c, title: c.title || fallbackTitle, messages: nextMessages, updatedAt: new Date().toISOString() } : c
-      );
+      const updatedConversations = !existing
+        ? [{ id: conversationId, title, messages: nextMessages, updatedAt: new Date().toISOString() }, ...prev]
+        : prev.map((c) =>
+            c.id === conversationId ? { ...c, title: c.title || title, messages: nextMessages, updatedAt: new Date().toISOString() } : c
+          );
+      return updatedConversations;
+    });
+    // Save to backend asynchronously
+    apiCall("/save-conversation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: String(conversationId), title, messages: nextMessages }),
+    }).catch(err => {
+      console.error("Failed to save conversation to backend:", err);
+      setError(`Warning: Local save only - ${err.message}`);
     });
   };
 
@@ -156,11 +177,22 @@ export default function App() {
         startNewConversation();
       }
     }
+    // Sync deletion to backend asynchronously
+    apiCall("/delete-conversation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: String(conversationId) }),
+    }).catch(err => console.error("Failed to delete from backend:", err));
   };
 
   const clearHistory = () => {
     setConversations([]);
     startNewConversation();
+    // Sync clear to backend asynchronously
+    apiCall("/clear-history", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    }).catch(err => console.error("Failed to clear backend history:", err));
   };
 
   const generateRecipe = async () => {
@@ -179,25 +211,24 @@ export default function App() {
     syncConversation(conversationId, nextMessages, createTitle(userPrompt));
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/generate", {
+      const data = await apiCall("/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ingredients: userPrompt }),
       });
 
-      if (!response.ok) throw new Error("Failed to generate recipe");
-
-      const data = await response.json();
       const aiMessage = { id: Date.now() + 1, type: "ai", content: data.recipe };
       const updatedMessages = [...nextMessages, aiMessage];
       setMessages(updatedMessages);
       syncConversation(conversationId, updatedMessages, createTitle(userPrompt));
+      setError("");
     } catch (requestError) {
-      console.error("Backend connection failed:", requestError);
-      const fallbackMessage = { id: Date.now() + 1, type: "ai", content: "Mock Response: Here is your high-protein vegan lasagna recipe. Fix your python backend to see real results." };
+      console.error("Failed to generate recipe:", requestError);
+      const errorMessage = `Error: ${requestError.message || "Failed to generate recipe. Please try again."}`;
+      setError(errorMessage);
+      const fallbackMessage = { id: Date.now() + 1, type: "ai", content: errorMessage };
       const fallbackMessages = [...nextMessages, fallbackMessage];
       setMessages(fallbackMessages);
-      setError("Backend not connected. Showing a mock response.");
       syncConversation(conversationId, fallbackMessages, createTitle(userPrompt));
     } finally {
       setLoading(false);
@@ -219,12 +250,12 @@ export default function App() {
       {/* Side Navigation Bar */}
       <aside className={`sidebar ${sidebarOpen ? "open" : "closed"}`}>
         <div className="sidebar-header">
-          <button className="icon-btn" onClick={() => setSidebarOpen(false)}>
+          <button className="icon-btn" onClick={() => setSidebarOpen(false)} aria-label="Close sidebar">
             <MenuIcon />
           </button>
         </div>
         
-        <button className="new-chat-btn" onClick={startNewConversation}>
+        <button className="new-chat-btn" onClick={startNewConversation} aria-label="Start new recipe conversation">
           <PlusIcon />
           <span>New Recipe</span>
         </button>
@@ -243,10 +274,10 @@ export default function App() {
             ) : (
               conversations.map((conversation) => (
                 <div key={conversation.id} className={`history-item ${currentConversationId === conversation.id ? "active" : ""}`}>
-                  <button className="history-main" onClick={() => loadConversation(conversation.id)}>
+                  <button className="history-main" onClick={() => loadConversation(conversation.id)} aria-label={`Load conversation: ${conversation.title}`}>
                     <span className="history-title">{conversation.title}</span>
                   </button>
-                  <button className="history-delete" onClick={() => deleteConversation(conversation.id)}>
+                  <button className="history-delete" onClick={() => deleteConversation(conversation.id)} aria-label={`Delete conversation: ${conversation.title}`}>
                     <TrashIcon />
                   </button>
                 </div>
@@ -261,7 +292,7 @@ export default function App() {
         <header className="site-header">
           <div className="header-left">
             {!sidebarOpen && (
-              <button className="icon-btn" onClick={() => setSidebarOpen(true)}>
+              <button className="icon-btn" onClick={() => setSidebarOpen(true)} aria-label="Open sidebar">
                 <MenuIcon />
               </button>
             )}
@@ -320,7 +351,7 @@ export default function App() {
                 onKeyDown={handleKeyDown}
                 disabled={loading}
               />
-              <button onClick={generateRecipe} disabled={loading || !ingredients.trim()}>
+              <button onClick={generateRecipe} disabled={loading || !ingredients.trim()} aria-label="Send recipe request">
                 <SendIcon />
               </button>
             </div>
