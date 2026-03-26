@@ -1,28 +1,25 @@
 :root {
   font-family: "Inter", "Segoe UI", sans-serif;
   color: #f4f7fb;
-  background:
-    radial-gradient(circle at top left, var(--theme-top), transparent 32%),
-    radial-gradient(circle at bottom right, var(--theme-bottom), transparent 28%),
-    #08111f;
+  background: linear-gradient(180deg, #0a1220 0%, #0d1725 46%, #101b2b 100%);
   color-scheme: dark;
   --bg-page: #08111f;
-  --bg-panel: #0c1627;
-  --bg-panel-strong: #101b30;
-  --bg-card: #111d33;
-  --bg-card-hover: #17243c;
+  --bg-panel: #0d1725;
+  --bg-panel-strong: #111c2b;
+  --bg-card: #131e2d;
+  --bg-card-hover: #182435;
   --border-soft: rgba(255, 255, 255, 0.1);
   --border-strong: rgba(255, 255, 255, 0.18);
   --text-main: #f8fafc;
   --text-muted: #9eb0c5;
-  --accent: #f59e0b;
-  --accent-strong: #fb7185;
-  --accent-cool: #22c55e;
-  --theme-top: rgba(245, 158, 11, 0.18);
-  --theme-bottom: rgba(14, 165, 233, 0.18);
-  --theme-center: rgba(255, 255, 255, 0.04);
-  --glow-warm: rgba(245, 158, 11, 0.14);
-  --glow-cool: rgba(14, 165, 233, 0.12);
+  --accent: #b3c0d4;
+  --accent-strong: #7f97b8;
+  --accent-cool: #8ea7bd;
+  --theme-top: rgba(90, 109, 138, 0.12);
+  --theme-bottom: rgba(60, 78, 104, 0.1);
+  --theme-center: rgba(180, 198, 222, 0.02);
+  --glow-warm: rgba(122, 139, 165, 0.05);
+  --glow-cool: rgba(84, 104, 129, 0.05);
   --shadow-soft: 0 24px 60px rgba(2, 6, 23, 0.35);
 }
 
@@ -68,9 +65,7 @@ input {
   grid-template-columns: 320px minmax(0, 1fr);
   overflow-x: hidden;
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, transparent), transparent 40%),
-    linear-gradient(225deg, color-mix(in srgb, var(--accent-strong) 8%, transparent), transparent 35%),
-    var(--bg-page);
+    linear-gradient(180deg, #09111d 0%, #0c1624 42%, #101b2a 100%);
   transition: grid-template-columns 0.26s ease;
 }
 
@@ -124,7 +119,7 @@ input {
 
 .sidebar-title {
   color: color-mix(in srgb, var(--accent-strong) 72%, white);
-  text-shadow: 0 0 28px color-mix(in srgb, var(--accent-strong) 20%, transparent);
+  text-shadow: 0 0 16px color-mix(in srgb, var(--accent-strong) 12%, transparent);
 }
 
 .icon-btn {
@@ -228,7 +223,7 @@ input {
 
 .history-item.active {
   background: #162238;
-  border-color: rgba(245, 158, 11, 0.28);
+  border-color: color-mix(in srgb, var(--accent-strong) 32%, transparent);
 }
 
 .history-main {
@@ -285,9 +280,13 @@ input {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    radial-gradient(circle at 50% 12%, var(--glow-warm), transparent 24%),
-    radial-gradient(circle at 50% 88%, var(--glow-cool), transparent 24%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent-cool) 4%, transparent),
+    transparent 20%,
+    transparent 80%,
+    color-mix(in srgb, var(--accent-strong) 4%, transparent)
+  );
 }
 
 .topbar {
@@ -329,7 +328,7 @@ input {
   letter-spacing: 0.26em;
   text-transform: uppercase;
   color: color-mix(in srgb, var(--accent) 84%, white);
-  text-shadow: 0 0 24px color-mix(in srgb, var(--accent) 22%, transparent);
+  text-shadow: 0 0 16px color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
 .chat-name {
@@ -501,7 +500,7 @@ input {
 }
 
 .user-bubble {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 72%, transparent), color-mix(in srgb, var(--accent-strong) 68%, transparent));
+  background: linear-gradient(135deg, #6f849f, #55667d);
   border-color: transparent;
 }
 
@@ -543,7 +542,7 @@ input {
   width: 0.45rem;
   height: 0.45rem;
   border-radius: 50%;
-  background: #fde68a;
+  background: var(--accent);
   animation: typingPulse 1.2s infinite ease-in-out;
 }
 

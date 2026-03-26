@@ -19,98 +19,17 @@ const LOADER_TEXTS = [
   "Finishing the final recipe...",
 ];
 
-const TIME_THEMES = [
-  {
-    backgroundTop: "rgba(125, 211, 252, 0.09)",
-    backgroundBottom: "rgba(147, 197, 253, 0.07)",
-    backgroundCenter: "rgba(255, 255, 255, 0.015)",
-    accent: "#c7d2fe",
-    accentStrong: "#93c5fd",
-    accentCool: "#bae6fd",
-    textMuted: "#9fb0c8",
-    glowWarm: "rgba(125, 211, 252, 0.05)",
-    glowCool: "rgba(147, 197, 253, 0.05)",
-  },
-  {
-    backgroundTop: "rgba(165, 180, 252, 0.09)",
-    backgroundBottom: "rgba(196, 181, 253, 0.07)",
-    backgroundCenter: "rgba(255, 255, 255, 0.015)",
-    accent: "#c4b5fd",
-    accentStrong: "#a5b4fc",
-    accentCool: "#ddd6fe",
-    textMuted: "#a7a4c6",
-    glowWarm: "rgba(165, 180, 252, 0.05)",
-    glowCool: "rgba(196, 181, 253, 0.05)",
-  },
-  {
-    backgroundTop: "rgba(244, 114, 182, 0.08)",
-    backgroundBottom: "rgba(253, 186, 116, 0.08)",
-    backgroundCenter: "rgba(255, 255, 255, 0.015)",
-    accent: "#f9a8d4",
-    accentStrong: "#fdba74",
-    accentCool: "#fbcfe8",
-    textMuted: "#bca5b2",
-    glowWarm: "rgba(244, 114, 182, 0.05)",
-    glowCool: "rgba(253, 186, 116, 0.05)",
-  },
-  {
-    backgroundTop: "rgba(253, 224, 71, 0.08)",
-    backgroundBottom: "rgba(251, 191, 36, 0.07)",
-    backgroundCenter: "rgba(255, 255, 255, 0.015)",
-    accent: "#fde68a",
-    accentStrong: "#fcd34d",
-    accentCool: "#fef3c7",
-    textMuted: "#bdae7f",
-    glowWarm: "rgba(253, 224, 71, 0.05)",
-    glowCool: "rgba(251, 191, 36, 0.05)",
-  },
-  {
-    backgroundTop: "rgba(110, 231, 183, 0.08)",
-    backgroundBottom: "rgba(153, 246, 228, 0.07)",
-    backgroundCenter: "rgba(255, 255, 255, 0.015)",
-    accent: "#a7f3d0",
-    accentStrong: "#99f6e4",
-    accentCool: "#d1fae5",
-    textMuted: "#9fbaaf",
-    glowWarm: "rgba(110, 231, 183, 0.05)",
-    glowCool: "rgba(153, 246, 228, 0.05)",
-  },
-  {
-    backgroundTop: "rgba(134, 239, 172, 0.08)",
-    backgroundBottom: "rgba(147, 197, 253, 0.07)",
-    backgroundCenter: "rgba(255, 255, 255, 0.015)",
-    accent: "#bbf7d0",
-    accentStrong: "#bfdbfe",
-    accentCool: "#dcfce7",
-    textMuted: "#a1b9b0",
-    glowWarm: "rgba(134, 239, 172, 0.05)",
-    glowCool: "rgba(147, 197, 253, 0.05)",
-  },
-  {
-    backgroundTop: "rgba(253, 186, 116, 0.08)",
-    backgroundBottom: "rgba(252, 165, 165, 0.07)",
-    backgroundCenter: "rgba(255, 255, 255, 0.015)",
-    accent: "#fdba74",
-    accentStrong: "#fca5a5",
-    accentCool: "#fed7aa",
-    textMuted: "#baa08d",
-    glowWarm: "rgba(253, 186, 116, 0.05)",
-    glowCool: "rgba(252, 165, 165, 0.05)",
-  },
-  {
-    backgroundTop: "rgba(103, 232, 249, 0.08)",
-    backgroundBottom: "rgba(125, 211, 252, 0.07)",
-    backgroundCenter: "rgba(255, 255, 255, 0.015)",
-    accent: "#a5f3fc",
-    accentStrong: "#bae6fd",
-    accentCool: "#cffafe",
-    textMuted: "#9eb9c2",
-    glowWarm: "rgba(103, 232, 249, 0.05)",
-    glowCool: "rgba(125, 211, 252, 0.05)",
-  },
-];
-
-const getTimeTheme = () => TIME_THEMES[Math.floor(new Date().getHours() / 3)];
+const MECHANICAL_OMINOUS_COLD_THEME = {
+  backgroundTop: "rgba(90, 109, 138, 0.12)",
+  backgroundBottom: "rgba(60, 78, 104, 0.1)",
+  backgroundCenter: "rgba(180, 198, 222, 0.02)",
+  accent: "#b3c0d4",
+  accentStrong: "#7f97b8",
+  accentCool: "#8ea7bd",
+  textMuted: "#7f8ea3",
+  glowWarm: "rgba(122, 139, 165, 0.05)",
+  glowCool: "rgba(84, 104, 129, 0.05)",
+};
 
 const createTitle = (text) => {
   const cleaned = text.replace(/\s+/g, " ").trim();
@@ -197,7 +116,6 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [loadingTextIndex, setLoadingTextIndex] = useState(0);
-  const [timeTheme, setTimeTheme] = useState(getTimeTheme);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -289,14 +207,6 @@ export default function App() {
 
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  useEffect(() => {
-    const interval = window.setInterval(() => {
-      setTimeTheme(getTimeTheme());
-    }, 60000);
-
-    return () => window.clearInterval(interval);
   }, []);
 
   const syncConversation = (conversationId, nextMessages, fallbackTitle) => {
@@ -473,15 +383,15 @@ export default function App() {
     conversations.find((conversation) => conversation.id === currentConversationId)?.title;
 
   const themeStyle = {
-    "--theme-top": timeTheme.backgroundTop,
-    "--theme-bottom": timeTheme.backgroundBottom,
-    "--theme-center": timeTheme.backgroundCenter,
-    "--accent": timeTheme.accent,
-    "--accent-strong": timeTheme.accentStrong,
-    "--accent-cool": timeTheme.accentCool,
-    "--text-muted": timeTheme.textMuted,
-    "--glow-warm": timeTheme.glowWarm,
-    "--glow-cool": timeTheme.glowCool,
+    "--theme-top": MECHANICAL_OMINOUS_COLD_THEME.backgroundTop,
+    "--theme-bottom": MECHANICAL_OMINOUS_COLD_THEME.backgroundBottom,
+    "--theme-center": MECHANICAL_OMINOUS_COLD_THEME.backgroundCenter,
+    "--accent": MECHANICAL_OMINOUS_COLD_THEME.accent,
+    "--accent-strong": MECHANICAL_OMINOUS_COLD_THEME.accentStrong,
+    "--accent-cool": MECHANICAL_OMINOUS_COLD_THEME.accentCool,
+    "--text-muted": MECHANICAL_OMINOUS_COLD_THEME.textMuted,
+    "--glow-warm": MECHANICAL_OMINOUS_COLD_THEME.glowWarm,
+    "--glow-cool": MECHANICAL_OMINOUS_COLD_THEME.glowCool,
   };
 
   return (
