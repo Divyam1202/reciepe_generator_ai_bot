@@ -344,7 +344,7 @@ button {
   white-space: pre-wrap;
   word-wrap: break-word;
 }
-
+  
 .message-row.ai .message-bubble {
   background-color: transparent;
   color: var(--text-primary);
