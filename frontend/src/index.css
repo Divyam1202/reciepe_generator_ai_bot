@@ -8,6 +8,8 @@
   --bg-panel-strong: #1e213a;
   --bg-card: #212541;
   --bg-card-hover: #292e4d;
+  --nav-surface: #1e1b3b;
+  --nav-surface-strong: #252047;
   --border-soft: rgba(255, 255, 255, 0.1);
   --border-strong: rgba(255, 255, 255, 0.18);
   --text-main: #f8fafc;
@@ -84,7 +86,7 @@ input {
   flex-direction: column;
   gap: 1.25rem;
   padding: 1.5rem;
-  background: #16182f;
+  background: linear-gradient(180deg, var(--nav-surface-strong), var(--nav-surface));
   border-right: 1px solid var(--border-soft);
   transition: transform 0.24s ease, opacity 0.24s ease;
   overflow: hidden;
@@ -300,7 +302,7 @@ input {
   justify-content: space-between;
   gap: 1rem;
   padding: 1.2rem 1.8rem 0.9rem;
-  background: linear-gradient(180deg, #121327, #121327e8 78%, transparent);
+  background: linear-gradient(180deg, var(--nav-surface), color-mix(in srgb, var(--nav-surface) 86%, transparent) 78%, transparent);
 }
 
 .topbar-side {
