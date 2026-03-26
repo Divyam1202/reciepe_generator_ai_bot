@@ -11,6 +11,7 @@ MIN_GENERAL_RESPONSE_LENGTH = 5
 
 
 def _render_fallback_chat_prompt(chat_messages: List[Dict[str, str]]) -> str:
+    """Render chat messages in plain text format."""
     lines = []
     for message in chat_messages:
         role = message["role"].capitalize()
@@ -19,7 +20,15 @@ def _render_fallback_chat_prompt(chat_messages: List[Dict[str, str]]) -> str:
     return "\n\n".join(lines)
 
 
-def _tokenize_request(tokenizer, prompt: Optional[str], chat_messages: Optional[List[Dict[str, str]]]):
+def _tokenize_request(
+    tokenizer, prompt: Optional[str], chat_messages: Optional[List[Dict[str, str]]]
+) -> tuple:
+    """
+    Convert text and chat messages to tokenized format.
+    
+    Returns:
+        tuple: (tokenized inputs, rendered prompt text)
+    """
     rendered_prompt = prompt or ""
 
     if chat_messages:
@@ -32,7 +41,7 @@ def _tokenize_request(tokenizer, prompt: Optional[str], chat_messages: Optional[
             )
             return {"input_ids": input_ids}, tokenizer.decode(input_ids[0], skip_special_tokens=False)
         except Exception as exc:
-            logger.warning("Falling back to plain-text prompt rendering: %s", exc)
+            logger.warning("Chat template failed, using fallback: %s", exc)
             rendered_prompt = _render_fallback_chat_prompt(chat_messages)
 
     inputs = tokenizer(rendered_prompt, return_tensors="pt")
@@ -40,9 +49,20 @@ def _tokenize_request(tokenizer, prompt: Optional[str], chat_messages: Optional[
 
 
 def _is_valid_response(response_text: str, require_recipe: bool) -> bool:
+    """Check if the generated response meets minimum quality standards."""
+    if not response_text or not isinstance(response_text, str):
+        return False
+
+    stripped = response_text.strip()
+    if not stripped:
+        return False
+
     if require_recipe:
-        return len(response_text) >= 150 and validate_recipe_structure(response_text)
-    return len(response_text.strip()) >= MIN_GENERAL_RESPONSE_LENGTH
+        # For recipes, require more content and structural validation
+        return len(stripped) >= 150 and validate_recipe_structure(stripped)
+    else:
+        # For conversation, just require minimum length
+        return len(stripped) >= MIN_GENERAL_RESPONSE_LENGTH
 
 
 def generate_response(
@@ -50,74 +70,126 @@ def generate_response(
     chat_messages: Optional[List[Dict[str, str]]] = None,
     require_recipe: bool = True,
     max_retries: int = 2,
-):
-    """Generate either a recipe or a conversational follow-up based on the request mode."""
+) -> str:
+    """
+    Generate either a recipe or conversational response.
+    
+    Args:
+        prompt: Direct text prompt (ignored if chat_messages provided)
+        chat_messages: List of role/content dicts for conversation context
+        require_recipe: Whether to enforce recipe format
+        max_retries: Number of retry attempts
+        
+    Returns:
+        Generated response text
+        
+    Raises:
+        RuntimeError: If generation fails after all retries
+    """
+    if not prompt and not chat_messages:
+        raise ValueError("Either prompt or chat_messages must be provided")
+
+    model = None
+    tokenizer = None
+    last_error = None
 
     for attempt in range(max_retries):
         try:
+            # Load model and tokenizer
             model, tokenizer = get_model()
 
             if model is None or tokenizer is None:
                 raise RuntimeError("Model or tokenizer failed to load")
 
-            if tokenizer.pad_token_id is None and tokenizer.eos_token_id is not None:
-                tokenizer.pad_token = tokenizer.eos_token
+            # Configure padding token
+            if tokenizer.pad_token_id is None:
+                if tokenizer.eos_token_id is not None:
+                    tokenizer.pad_token_id = tokenizer.eos_token_id
+                else:
+                    logger.warning("No pad token configured, using eos token")
 
-            inputs, rendered_prompt = _tokenize_request(tokenizer, prompt, chat_messages)
+            # Tokenize input
+            try:
+                inputs, rendered_prompt = _tokenize_request(tokenizer, prompt, chat_messages)
+            except Exception as e:
+                logger.error("Tokenization failed on attempt %d: %s", attempt + 1, e)
+                last_error = e
+                continue
+
+            # Move inputs to model device
             inputs = {key: value.to(model.device) for key, value in inputs.items()}
 
-            with torch.no_grad():
-                outputs = model.generate(
-                    **inputs,
-                    max_new_tokens=2500,
-                    temperature=0.4,
-                    top_p=0.9,
-                    do_sample=True,
-                    pad_token_id=tokenizer.eos_token_id,
-                    repetition_penalty=1.2,
-                    length_penalty=0.8,
-                    num_beams=1,
-                    no_repeat_ngram_size=2,
-                    early_stopping=True
-                )
+            # Generate response
+            try:
+                with torch.no_grad():
+                    outputs = model.generate(
+                        **inputs,
+                        max_new_tokens=2500,
+                        temperature=0.4,
+                        top_p=0.9,
+                        do_sample=True,
+                        pad_token_id=tokenizer.eos_token_id,
+                        repetition_penalty=1.2,
+                        length_penalty=0.8,
+                        num_beams=1,
+                        no_repeat_ngram_size=2,
+                        early_stopping=True,
+                    )
+            except torch.cuda.OutOfMemoryError as e:
+                logger.error("GPU out of memory on attempt %d", attempt + 1)
+                last_error = RuntimeError("GPU out of memory")
+                if attempt < max_retries - 1:
+                    # Try to free memory
+                    torch.cuda.empty_cache()
+                    continue
+                raise last_error
+            except Exception as e:
+                logger.error("Generation failed on attempt %d: %s", attempt + 1, e)
+                last_error = e
+                continue
 
-            prompt_token_count = inputs["input_ids"].shape[1]
-            generated_tokens = outputs[0][prompt_token_count:]
-            response_text = tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
-            response_text = strip_prompt_echo(rendered_prompt, response_text)
+            # Decode response
+            try:
+                prompt_token_count = inputs["input_ids"].shape[1]
+                generated_tokens = outputs[0][prompt_token_count:]
+                response_text = tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
+                response_text = strip_prompt_echo(rendered_prompt, response_text)
+            except Exception as e:
+                logger.error("Decoding failed on attempt %d: %s", attempt + 1, e)
+                last_error = e
+                continue
 
+            # Validate response
             if not _is_valid_response(response_text, require_recipe):
                 logger.warning(
-                    "Attempt %s: Response failed validation (require_recipe=%s, length=%s)",
+                    "Response validation failed on attempt %d (require_recipe=%s, length=%d)",
                     attempt + 1,
                     require_recipe,
                     len(response_text),
                 )
-                if attempt == max_retries - 1:
-                    if require_recipe:
-                        raise ValueError("Recipe missing required sections or content")
-                    raise ValueError("Model generated insufficient content")
-                continue
+                last_error = ValueError(
+                    f"Invalid response: {('Recipe missing required sections' if require_recipe else 'Insufficient content')}"
+                )
+                if attempt < max_retries - 1:
+                    continue
+                raise last_error
 
-            logger.info("Response generated successfully on attempt %s", attempt + 1)
+            logger.info("Response generated successfully on attempt %d", attempt + 1)
             return response_text
-            
-        except torch.cuda.OutOfMemoryError:
-            logger.error(f"Attempt {attempt + 1}: GPU out of memory")
-            if attempt == max_retries - 1:
-                raise RuntimeError("GPU out of memory - recipe generation failed")
-        except RuntimeError as e:
-            logger.error(f"Attempt {attempt + 1}: Runtime error: {str(e)}")
-            if attempt == max_retries - 1:
-                raise
+
         except Exception as e:
-            logger.error(f"Attempt {attempt + 1}: Unexpected error: {str(e)}")
-            if attempt == max_retries - 1:
-                raise RuntimeError(f"Failed to generate recipe: {str(e)}")
-    
-    raise RuntimeError("Response generation failed after all retry attempts")
+            logger.error("Attempt %d failed: %s", attempt + 1, e)
+            last_error = e
+            if attempt < max_retries - 1:
+                continue
+            break
+
+    # All retries exhausted
+    error_msg = str(last_error) if last_error else "Unknown error"
+    logger.error("Generation failed after %d attempts: %s", max_retries, error_msg)
+    raise RuntimeError(f"Failed to generate response after {max_retries} attempts: {error_msg}")
 
 
-def generate_recipe(prompt: str, max_retries: int = 2):
+def generate_recipe(prompt: str, max_retries: int = 2) -> str:
     """Backward-compatible recipe generation wrapper."""
     return generate_response(prompt=prompt, require_recipe=True, max_retries=max_retries)
