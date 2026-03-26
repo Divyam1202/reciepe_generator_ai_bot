@@ -2,7 +2,7 @@
   font-family: "Inter", "Segoe UI", sans-serif;
   color: #f4f7fb;
   background: linear-gradient(180deg, #121327 0%, #171934 48%, #1b1830 100%);
-  color-scheme: dark;
+  color-scheme: light dark;
   --bg-page: #121327;
   --bg-panel: #171a31;
   --bg-panel-strong: #1e213a;
@@ -379,9 +379,9 @@ input {
   align-items: center;
   padding: 0.5rem 0.9rem;
   border-radius: 999px;
-  background: rgba(245, 158, 11, 0.14);
-  color: #fde68a;
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: color-mix(in srgb, var(--accent) 72%, var(--text-main));
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
   font-size: 0.84rem;
 }
 
@@ -501,7 +501,7 @@ input {
   max-width: min(760px, 100%);
   padding: 1rem 1rem 0.85rem;
   border-radius: 1.3rem;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--border-soft);
 }
 
 .ai-bubble {
@@ -525,7 +525,7 @@ input {
   justify-content: space-between;
   gap: 1rem;
   margin-top: 0.8rem;
-  color: rgba(255, 255, 255, 0.72);
+  color: color-mix(in srgb, var(--text-main) 70%, transparent);
   font-size: 0.78rem;
 }
 
@@ -565,8 +565,8 @@ input {
 
 .error-bubble {
   border-color: rgba(248, 113, 113, 0.45);
-  background: #4b2132;
-  color: #fecaca;
+  background: color-mix(in srgb, var(--accent-strong) 20%, var(--bg-card));
+  color: color-mix(in srgb, var(--accent-strong) 70%, var(--text-main));
 }
 
 .composer {
@@ -652,7 +652,7 @@ input {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.16);
+  background: color-mix(in srgb, var(--accent) 24%, transparent);
   border-radius: 999px;
 }
 
