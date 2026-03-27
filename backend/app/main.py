@@ -42,6 +42,18 @@ def health_check():
     return {"status": "ok", "service": "Recipe AI Backend"}
 
 
+@app.get("/ready")
+def ready_check():
+    """Readiness check endpoint - waits for model to load."""
+    try:
+        from .model_loader import get_model
+        get_model()  # Blocks until model is loaded
+        return {"status": "ready", "service": "Recipe AI Backend"}
+    except Exception as e:
+        logger.error(f"Model not ready: {e}")
+        return {"status": "not_ready", "error": str(e)}, 503
+
+
 @app.get("/")
 def root():
     """Root endpoint."""

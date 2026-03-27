@@ -8,10 +8,10 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
  * Fetch with timeout
  * @param {string} url - The URL to fetch
  * @param {object} options - Fetch options
- * @param {number} timeout - Timeout in milliseconds (default: 120000 = 2 minutes)
+ * @param {number} timeout - Timeout in milliseconds (default: 180000 = 3 minutes)
  * @returns {Promise} - The response
  */
-export async function fetchWithTimeout(url, options = {}, timeout = 120000) {
+export async function fetchWithTimeout(url, options = {}, timeout = 180000) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
   
