@@ -1,4 +1,5 @@
 import re
+import unicodedata
 
 RECIPE_MARKERS = (
     "Now write the complete detailed recipe with ALL sections:",
@@ -10,6 +11,7 @@ RESPONSE_PREFIXES = (
     "AI:",
     "Chef AI:",
 )
+SUSPICIOUS_SYMBOL_RUN = re.compile(r"[^\w\s.,:;!?()/%\-'\"]{8,}")
 
 
 def strip_prompt_echo(prompt: str, generated_text: str) -> str:
@@ -32,6 +34,45 @@ def strip_prompt_echo(prompt: str, generated_text: str) -> str:
             recipe = recipe[len(prefix):].strip()
 
     return recipe
+
+
+def sanitize_generated_text(generated_text: str) -> str:
+    """Remove obviously corrupted characters and trailing gibberish from model output."""
+    text = (generated_text or "").replace("\r\n", "\n").replace("\r", "\n").strip()
+    if not text:
+        return ""
+
+    cleaned_chars = []
+    for char in text:
+        category = unicodedata.category(char)
+        if char in ("\n", "\t"):
+            cleaned_chars.append(char)
+            continue
+        if category.startswith("C") and char != " ":
+            continue
+        if char == "\ufffd":
+            continue
+        cleaned_chars.append(char)
+
+    text = "".join(cleaned_chars)
+    text = SUSPICIOUS_SYMBOL_RUN.split(text, maxsplit=1)[0].strip()
+
+    cleaned_lines = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            if cleaned_lines and cleaned_lines[-1] != "":
+                cleaned_lines.append("")
+            continue
+
+        symbol_count = sum(
+            1 for char in stripped if not (char.isalnum() or char.isspace() or char in ".,:;!?()/%-+*&'\"#")
+        )
+        if len(stripped) >= 6 and symbol_count / max(len(stripped), 1) > 0.35:
+            break
+        cleaned_lines.append(stripped)
+
+    return "\n".join(cleaned_lines).strip()
 
 
 def validate_recipe_structure(recipe: str) -> bool:

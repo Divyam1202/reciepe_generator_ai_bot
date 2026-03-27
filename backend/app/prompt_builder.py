@@ -54,6 +54,26 @@ RECIPE_HINTS = (
     "servings",
 )
 
+RECIPE_RESPONSE_TEMPLATE = (
+    "Write exactly one practical recipe using the user's ingredients.\n"
+    "If an ingredient is broad, such as 'protein source', 'salad', or 'condiments', make a sensible assumption and say so briefly.\n"
+    "If the ingredients fit a sandwich, toast, wrap, snack, or street-food style recipe better than a full meal, choose that naturally.\n"
+    "Do not output placeholder text, corrupted symbols, or repeated filler.\n\n"
+    "Use this exact structure:\n"
+    "Recipe Title: <title>\n"
+    "Prep Time: <time>\n"
+    "Cook Time: <time>\n"
+    "Servings: <number>\n"
+    "Ingredients:\n"
+    "- item with quantity\n"
+    "Instructions:\n"
+    "1. step\n"
+    "Serving Tips:\n"
+    "- tip\n"
+    "Variations:\n"
+    "- variation"
+)
+
 
 def _should_skip_message(message: MessageModel) -> bool:
     content = (message.content or "").strip()
@@ -115,8 +135,18 @@ def build_generation_context(user_input: str, messages: List[MessageModel]) -> D
 
     require_recipe = should_enforce_recipe_format(cleaned_input, normalized_messages)
     system_prompt = RECIPE_SYSTEM_PROMPT if require_recipe else BASE_SYSTEM_PROMPT
+    chat_messages = [{"role": "system", "content": system_prompt}, *normalized_messages[-MAX_CONTEXT_MESSAGES:]]
+
+    if require_recipe and chat_messages:
+        chat_messages[-1] = {
+            "role": "user",
+            "content": (
+                f"User request: {cleaned_input}\n\n"
+                f"{RECIPE_RESPONSE_TEMPLATE}"
+            ),
+        }
 
     return {
-        "chat_messages": [{"role": "system", "content": system_prompt}, *normalized_messages[-MAX_CONTEXT_MESSAGES:]],
+        "chat_messages": chat_messages,
         "require_recipe": require_recipe,
     }

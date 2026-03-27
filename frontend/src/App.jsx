@@ -4,6 +4,7 @@ import { apiCall } from "./api";
 
 const STORAGE_KEY = "chef-ai-history";
 const MOBILE_BREAKPOINT = 900;
+const DEFAULT_CHAT_TITLE = "New recipe chat";
 
 const SUGGESTIONS = [
   "chicken, garlic, onions, tomato",
@@ -194,8 +195,56 @@ const getTimeTheme = () => TIME_THEMES[Math.floor(new Date().getHours() / 3)];
 
 const createTitle = (text) => {
   const cleaned = text.replace(/\s+/g, " ").trim();
-  if (!cleaned) return "New recipe chat";
+  if (!cleaned) return DEFAULT_CHAT_TITLE;
   return cleaned.length > 34 ? `${cleaned.slice(0, 34)}...` : cleaned;
+};
+
+const isRecipeMetaLine = (line) =>
+  /^(prep time|cook time|servings|serves|yield|ingredients|instructions|method|directions|storage|variation|variations|serving tips)\b/i.test(
+    line,
+  );
+
+const cleanTitleCandidate = (line) =>
+  line
+    .replace(/^#{1,6}\s*/, "")
+    .replace(/^\*\*(.+)\*\*$/, "$1")
+    .replace(/^[*-]\s*/, "")
+    .trim();
+
+const extractRecipeTitle = (recipeText, fallbackTitle) => {
+  const lines = String(recipeText ?? "")
+    .split(/\r?\n/)
+    .map(cleanTitleCandidate)
+    .filter(Boolean);
+
+  for (let index = 0; index < Math.min(lines.length, 10); index += 1) {
+    const line = lines[index];
+    const inlineTitle = line.match(/^recipe title\s*:\s*(.+)$/i);
+
+    if (inlineTitle?.[1]) {
+      return createTitle(inlineTitle[1]);
+    }
+
+    if (/^recipe title\s*:?$/i.test(line)) {
+      const nextLine = lines
+        .slice(index + 1)
+        .find((candidate) => !isRecipeMetaLine(candidate) && candidate.length >= 4);
+
+      if (nextLine) {
+        return createTitle(nextLine);
+      }
+    }
+  }
+
+  const fallbackCandidate = lines.find(
+    (line) =>
+      line.length >= 4 &&
+      line.length <= 80 &&
+      !isRecipeMetaLine(line) &&
+      !/^recipe title\s*:?$/i.test(line),
+  );
+
+  return fallbackCandidate ? createTitle(fallbackCandidate) : fallbackTitle;
 };
 
 const formatTime = (timestamp) => {
@@ -219,7 +268,7 @@ const normalizeMessage = (message) => ({
 
 const normalizeConversation = (conversation) => ({
   id: String(conversation.id),
-  title: conversation.title || "New recipe chat",
+  title: conversation.title || DEFAULT_CHAT_TITLE,
   updatedAt: conversation.updatedAt ?? new Date().toISOString(),
   messages: Array.isArray(conversation.messages)
     ? conversation.messages.map(normalizeMessage)
@@ -379,7 +428,8 @@ export default function App() {
     return () => window.clearInterval(interval);
   }, []);
 
-  const syncConversation = (conversationId, nextMessages, fallbackTitle) => {
+  const syncConversation = (conversationId, nextMessages, nextTitle, options = {}) => {
+    const { forceTitleUpdate = false } = options;
     const timestamp = new Date().toISOString();
 
     setConversations((previous) => {
@@ -390,7 +440,7 @@ export default function App() {
         return [
           {
             id: normalizedId,
-            title: fallbackTitle,
+            title: nextTitle || DEFAULT_CHAT_TITLE,
             updatedAt: timestamp,
             messages: nextMessages,
           },
@@ -402,7 +452,10 @@ export default function App() {
         conversation.id === normalizedId
           ? {
               ...conversation,
-              title: fallbackTitle || conversation.title,
+              title:
+                forceTitleUpdate && nextTitle
+                  ? nextTitle
+                  : conversation.title || nextTitle || DEFAULT_CHAT_TITLE,
               updatedAt: timestamp,
               messages: nextMessages,
             }
@@ -493,6 +546,10 @@ export default function App() {
     if (!trimmedIngredients || loading) return;
 
     const conversationId = currentConversationId ?? String(Date.now());
+    const existingConversation = conversations.find(
+      (conversation) => conversation.id === String(conversationId),
+    );
+    const hadAssistantMessage = messages.some((message) => message.type === "ai");
     const timestamp = new Date().toISOString();
     const userMessage = {
       id: Date.now(),
@@ -502,14 +559,14 @@ export default function App() {
     };
 
     const nextMessages = [...messages, userMessage];
-    const title = createTitle(trimmedIngredients);
+    const draftTitle = existingConversation?.title || createTitle(trimmedIngredients);
 
     setCurrentConversationId(conversationId);
     setMessages(nextMessages);
     setIngredients("");
     setLoading(true);
     setError("");
-    syncConversation(conversationId, nextMessages, title);
+    syncConversation(conversationId, nextMessages, draftTitle);
 
     try {
       const data = await apiCall("/generate", {
@@ -517,7 +574,7 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ingredients: trimmedIngredients,
-          messages: buildConversationPayload(conversationId, title, nextMessages).messages,
+          messages: buildConversationPayload(conversationId, draftTitle, nextMessages).messages,
         }),
       });
 
@@ -529,13 +586,20 @@ export default function App() {
       };
 
       const updatedMessages = [...nextMessages, aiMessage];
+      const finalTitle =
+        hadAssistantMessage || existingConversation?.title
+          ? existingConversation?.title || draftTitle
+          : extractRecipeTitle(data.recipe, draftTitle);
+
       setMessages(updatedMessages);
-      syncConversation(conversationId, updatedMessages, title);
-      await saveConversationToBackend(conversationId, title, updatedMessages);
+      syncConversation(conversationId, updatedMessages, finalTitle, {
+        forceTitleUpdate: !hadAssistantMessage,
+      });
+      await saveConversationToBackend(conversationId, finalTitle, updatedMessages);
     } catch (requestError) {
       console.error("Recipe generation failed:", requestError);
       setError(requestError.message || "Unable to reach the backend right now.");
-      await saveConversationToBackend(conversationId, title, nextMessages);
+      await saveConversationToBackend(conversationId, draftTitle, nextMessages);
     } finally {
       setLoading(false);
     }

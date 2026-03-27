@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 import torch
 
 from .model_loader import get_model
-from .recipe_utils import strip_prompt_echo, validate_recipe_structure
+from .recipe_utils import sanitize_generated_text, strip_prompt_echo, validate_recipe_structure
 
 logger = logging.getLogger(__name__)
 MIN_GENERAL_RESPONSE_LENGTH = 5
@@ -182,6 +182,7 @@ def generate_response(
                 generated_tokens = outputs[0][prompt_token_count:]
                 response_text = tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
                 response_text = strip_prompt_echo(rendered_prompt, response_text)
+                response_text = sanitize_generated_text(response_text)
             except Exception as e:
                 logger.error("Decoding failed on attempt %d: %s", attempt + 1, e)
                 last_error = e
