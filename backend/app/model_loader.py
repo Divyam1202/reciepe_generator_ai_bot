@@ -19,17 +19,51 @@ _tokenizer: Optional[AutoTokenizer] = None
 _model_error: Optional[Exception] = None
 _load_lock = threading.Lock()
 LOCAL_MODEL_DIR = Path(__file__).resolve().parents[2] / "models" / "finalmodel"
+DEFAULT_FALLBACK_MODEL = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 
 
-def _resolve_model_source() -> str:
-    explicit_source = os.getenv("RECIPE_MODEL_SOURCE")
+def _is_adapter_directory(model_path: Path) -> bool:
+    return model_path.is_dir() and (model_path / "adapter_config.json").exists()
+
+
+def _read_adapter_base_model(model_path: Path) -> Optional[str]:
+    adapter_config = model_path / "adapter_config.json"
+    if not adapter_config.exists():
+        return None
+
+    try:
+        import json
+
+        data = json.loads(adapter_config.read_text(encoding="utf-8"))
+        base_model = data.get("base_model_name_or_path")
+        if isinstance(base_model, str) and base_model.strip():
+            return base_model.strip()
+    except Exception as exc:  # pragma: no cover - best effort logging only
+        logger.warning("Failed to inspect adapter config at %s: %s", adapter_config, exc)
+
+    return None
+
+
+def _resolve_model_source(device: str) -> str:
+    explicit_source = os.getenv("RECIPE_MODEL_SOURCE") or os.getenv("MODEL_PATH")
     if explicit_source:
         return explicit_source
 
     if LOCAL_MODEL_DIR.exists():
-        return str(LOCAL_MODEL_DIR)
+        if device == "cuda":
+            return str(LOCAL_MODEL_DIR)
 
-    return os.getenv("RECIPE_MODEL_NAME", "TinyLlama/TinyLlama-1.1B-Chat-v1.0")
+        adapter_base_model = _read_adapter_base_model(LOCAL_MODEL_DIR)
+        logger.warning(
+            "Skipping local adapter at %s on CPU. Base model '%s' is too large for the default "
+            "CPU startup path; falling back to '%s'. Set RECIPE_MODEL_SOURCE or MODEL_PATH "
+            "to force a specific model.",
+            LOCAL_MODEL_DIR,
+            adapter_base_model or "unknown",
+            os.getenv("RECIPE_MODEL_NAME", DEFAULT_FALLBACK_MODEL),
+        )
+
+    return os.getenv("RECIPE_MODEL_NAME", DEFAULT_FALLBACK_MODEL)
 
 
 def _get_device() -> str:
@@ -80,8 +114,8 @@ def load_model() -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
         if _model_error is not None:
             raise _model_error
 
-        model_source = _resolve_model_source()
         device = _get_device()
+        model_source = _resolve_model_source(device)
         load_kwargs = _build_model_load_kwargs(device)
 
         try:
@@ -100,10 +134,7 @@ def load_model() -> Tuple[AutoModelForCausalLM, AutoTokenizer]:
                 _model_error = RuntimeError(f"Tokenizer loading failed: {str(e)}")
                 raise _model_error
 
-            is_local_adapter = (
-                Path(model_source).is_dir()
-                and (Path(model_source) / "adapter_config.json").exists()
-            )
+            is_local_adapter = _is_adapter_directory(Path(model_source))
 
             try:
                 if is_local_adapter:

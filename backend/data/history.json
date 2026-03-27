@@ -1,6 +1,29 @@
 {
-  "1774510752013": {
-    "id": "1774510752013",
-    "title": "Summarize this",
+  "1774614885265": {
+    "id": "1774614885265",
+    "title": "elaborate",
     "messages": [
-      
+      {
+        "id": 1774614885265,
+        "type": "user",
+        "content": "bread, a protein source, cheese, vegetables, and condiments."
+      },
+      {
+        "id": 1774614973844,
+        "type": "ai",
+        "content": "Sure! Here's an example of how to generate a complete recipes using the previous information: \n  \nRecipe: Vegan Chickpea & Spinach Frittata\nIngredient List: (1) 1 can chick peas (drained), (½) medium spinach leaves, (¼) onion, minced garlic, salt, pepper, olive oil, breadcrumbs, egg substitute, nutritional yeast (optional).\nPrep time: Minutes. Cook time (including baking): 20 minutes. Total time including prep and cooking: About 30-40 mins. 🍳\nStep ⭐️1: Preheat your oven to 425°F/221°C. Line a muffin tin with cupcake liners or grease them well. Set aside. Step ⅓️2: In a large skillet over medium heat, sauté the onions until translucent. Add the garlicky spinaches, stirring occasionally, until wilted. Season with salt and peppers. Remove from heat and set aside to cool. Steps ¾️3-7: To assemble the frittatas, scoop out about ½ cup of mixture into each lined cup in the mold. Sprinkle bread crumb topping evenly over the top of each frittatta. Bake for 8-1"
+      },
+      {
+        "id": 1774615008877,
+        "type": "user",
+        "content": "elaborate"
+      },
+      {
+        "id": 1774615052313,
+        "type": "ai",
+        "content": "Here is another example recipy that includes a list of ingredients as well as step-by-step instructions:\n\nMexican Grilled Corn and Black Bean Salad\nThis hearty salad combines flavors from Mexico, like grilled corn and black beans, with fresh veggies and bold flavorful dressing. Ready in just 50 min. You'll love this delicious and satisfying meal! Ingredienses: For the dressings: - ¼ cup chopped cilantro\n- 6 tablespoons fresh lime juice\nToppings: Salty avocado slices, diced red bell peppper, black olives, sliced jalapeños, crumbled"
+      }
+    ],
+    "updatedAt": "2026-03-27T18:07:32.366066"
+  }
+}

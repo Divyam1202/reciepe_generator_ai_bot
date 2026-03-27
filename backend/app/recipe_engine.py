@@ -8,8 +8,10 @@ from .recipe_utils import strip_prompt_echo, validate_recipe_structure
 
 logger = logging.getLogger(__name__)
 MIN_GENERAL_RESPONSE_LENGTH = 5
-RECIPE_MAX_NEW_TOKENS = 900
-CHAT_MAX_NEW_TOKENS = 240
+CPU_RECIPE_MAX_NEW_TOKENS = 320
+GPU_RECIPE_MAX_NEW_TOKENS = 900
+CPU_CHAT_MAX_NEW_TOKENS = 160
+GPU_CHAT_MAX_NEW_TOKENS = 240
 
 
 def _render_fallback_chat_prompt(chat_messages: List[Dict[str, str]]) -> str:
@@ -35,13 +37,12 @@ def _tokenize_request(
 
     if chat_messages:
         try:
-            input_ids = tokenizer.apply_chat_template(
+            rendered_prompt = tokenizer.apply_chat_template(
                 chat_messages,
-                tokenize=True,
+                tokenize=False,
                 add_generation_prompt=True,
-                return_tensors="pt",
             )
-            return {"input_ids": input_ids}, tokenizer.decode(input_ids[0], skip_special_tokens=False)
+            return tokenizer(rendered_prompt, return_tensors="pt"), rendered_prompt
         except Exception as exc:
             logger.warning("Chat template failed, using fallback: %s", exc)
             rendered_prompt = _render_fallback_chat_prompt(chat_messages)
@@ -67,9 +68,23 @@ def _is_valid_response(response_text: str, require_recipe: bool) -> bool:
         return len(stripped) >= MIN_GENERAL_RESPONSE_LENGTH
 
 
-def _get_generation_kwargs(tokenizer, require_recipe: bool) -> dict:
+def _get_device_type(model) -> str:
+    device = getattr(model, "device", None)
+    if device is None:
+        return "cpu"
+    return getattr(device, "type", str(device))
+
+
+def _get_generation_kwargs(tokenizer, require_recipe: bool, device_type: str) -> dict:
     """Choose generation settings tuned for response type and latency."""
-    max_new_tokens = RECIPE_MAX_NEW_TOKENS if require_recipe else CHAT_MAX_NEW_TOKENS
+    if require_recipe:
+        max_new_tokens = (
+            CPU_RECIPE_MAX_NEW_TOKENS if device_type == "cpu" else GPU_RECIPE_MAX_NEW_TOKENS
+        )
+    else:
+        max_new_tokens = (
+            CPU_CHAT_MAX_NEW_TOKENS if device_type == "cpu" else GPU_CHAT_MAX_NEW_TOKENS
+        )
 
     return {
         "max_new_tokens": max_new_tokens,
@@ -78,7 +93,6 @@ def _get_generation_kwargs(tokenizer, require_recipe: bool) -> dict:
         "do_sample": True,
         "pad_token_id": tokenizer.eos_token_id,
         "repetition_penalty": 1.15,
-        "length_penalty": 0.9 if require_recipe else 1.0,
         "num_beams": 1,
         "no_repeat_ngram_size": 2,
         "use_cache": True,
@@ -109,25 +123,30 @@ def generate_response(
     if not prompt and not chat_messages:
         raise ValueError("Either prompt or chat_messages must be provided")
 
-    model = None
-    tokenizer = None
     last_error = None
+    response_text = ""
 
-    for attempt in range(max_retries):
+    try:
+        model, tokenizer = get_model()
+    except Exception as e:
+        logger.error("Failed to load model before generation: %s", e)
+        raise RuntimeError(f"Failed to load model for generation: {e}")
+
+    if model is None or tokenizer is None:
+        raise RuntimeError("Model or tokenizer failed to load")
+
+    device_type = _get_device_type(model)
+    effective_max_retries = 1 if device_type == "cpu" and require_recipe else max_retries
+
+    # Configure padding token once after model load
+    if tokenizer.pad_token_id is None:
+        if tokenizer.eos_token_id is not None:
+            tokenizer.pad_token_id = tokenizer.eos_token_id
+        else:
+            logger.warning("No pad token configured, using eos token")
+
+    for attempt in range(effective_max_retries):
         try:
-            # Load model and tokenizer
-            model, tokenizer = get_model()
-
-            if model is None or tokenizer is None:
-                raise RuntimeError("Model or tokenizer failed to load")
-
-            # Configure padding token
-            if tokenizer.pad_token_id is None:
-                if tokenizer.eos_token_id is not None:
-                    tokenizer.pad_token_id = tokenizer.eos_token_id
-                else:
-                    logger.warning("No pad token configured, using eos token")
-
             # Tokenize input
             try:
                 inputs, rendered_prompt = _tokenize_request(tokenizer, prompt, chat_messages)
@@ -139,18 +158,16 @@ def generate_response(
             # Move inputs to model device
             inputs = {key: value.to(model.device) for key, value in inputs.items()}
 
-            # Generate response
             try:
                 with torch.inference_mode():
                     outputs = model.generate(
                         **inputs,
-                        **_get_generation_kwargs(tokenizer, require_recipe),
+                        **_get_generation_kwargs(tokenizer, require_recipe, device_type),
                     )
-            except torch.cuda.OutOfMemoryError as e:
+            except torch.cuda.OutOfMemoryError:
                 logger.error("GPU out of memory on attempt %d", attempt + 1)
                 last_error = RuntimeError("GPU out of memory")
-                if attempt < max_retries - 1:
-                    # Try to free memory
+                if attempt < effective_max_retries - 1:
                     torch.cuda.empty_cache()
                     continue
                 raise last_error
@@ -172,6 +189,12 @@ def generate_response(
 
             # Validate response
             if not _is_valid_response(response_text, require_recipe):
+                if require_recipe and device_type == "cpu" and len(response_text) >= 120:
+                    logger.warning(
+                        "Accepting loosely structured CPU recipe response on attempt %d",
+                        attempt + 1,
+                    )
+                    return response_text
                 logger.warning(
                     "Response validation failed on attempt %d (require_recipe=%s, length=%d)",
                     attempt + 1,
@@ -181,7 +204,7 @@ def generate_response(
                 last_error = ValueError(
                     f"Invalid response: {('Recipe missing required sections' if require_recipe else 'Insufficient content')}"
                 )
-                if attempt < max_retries - 1:
+                if attempt < effective_max_retries - 1:
                     continue
                 raise last_error
 
@@ -191,14 +214,16 @@ def generate_response(
         except Exception as e:
             logger.error("Attempt %d failed: %s", attempt + 1, e)
             last_error = e
-            if attempt < max_retries - 1:
+            if attempt < effective_max_retries - 1:
                 continue
             break
 
     # All retries exhausted
     error_msg = str(last_error) if last_error else "Unknown error"
-    logger.error("Generation failed after %d attempts: %s", max_retries, error_msg)
-    raise RuntimeError(f"Failed to generate response after {max_retries} attempts: {error_msg}")
+    logger.error("Generation failed after %d attempts: %s", effective_max_retries, error_msg)
+    raise RuntimeError(
+        f"Failed to generate response after {effective_max_retries} attempts: {error_msg}"
+    )
 
 
 def generate_recipe(prompt: str, max_retries: int = 2) -> str:

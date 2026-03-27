@@ -3,15 +3,16 @@
  */
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+const DEFAULT_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT_MS || 600000);
 
 /**
  * Fetch with timeout
  * @param {string} url - The URL to fetch
  * @param {object} options - Fetch options
- * @param {number} timeout - Timeout in milliseconds (default: 120000 = 2 minutes)
+ * @param {number} timeout - Timeout in milliseconds
  * @returns {Promise} - The response
  */
-export async function fetchWithTimeout(url, options = {}, timeout = 120000) {
+export async function fetchWithTimeout(url, options = {}, timeout = DEFAULT_TIMEOUT_MS) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
   
@@ -39,9 +40,10 @@ export async function fetchWithTimeout(url, options = {}, timeout = 120000) {
  */
 export async function apiCall(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`;
+  const { timeoutMs = DEFAULT_TIMEOUT_MS, ...fetchOptions } = options;
   
   try {
-    const response = await fetchWithTimeout(url, options);
+    const response = await fetchWithTimeout(url, fetchOptions, timeoutMs);
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
