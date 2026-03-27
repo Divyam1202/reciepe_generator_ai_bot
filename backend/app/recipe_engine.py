@@ -35,13 +35,12 @@ def _tokenize_request(
 
     if chat_messages:
         try:
-            input_ids = tokenizer.apply_chat_template(
+            rendered_prompt = tokenizer.apply_chat_template(
                 chat_messages,
-                tokenize=True,
+                tokenize=False,
                 add_generation_prompt=True,
-                return_tensors="pt",
             )
-            return {"input_ids": input_ids}, tokenizer.decode(input_ids[0], skip_special_tokens=False)
+            return tokenizer(rendered_prompt, return_tensors="pt"), rendered_prompt
         except Exception as exc:
             logger.warning("Chat template failed, using fallback: %s", exc)
             rendered_prompt = _render_fallback_chat_prompt(chat_messages)
@@ -78,7 +77,6 @@ def _get_generation_kwargs(tokenizer, require_recipe: bool) -> dict:
         "do_sample": True,
         "pad_token_id": tokenizer.eos_token_id,
         "repetition_penalty": 1.15,
-        "length_penalty": 0.9 if require_recipe else 1.0,
         "num_beams": 1,
         "no_repeat_ngram_size": 2,
         "use_cache": True,
