@@ -84,11 +84,11 @@ def should_enforce_recipe_format(user_input: str, normalized_messages: List[Dict
     text = (user_input or "").strip().lower()
     has_prior_assistant_reply = any(message["role"] == "assistant" for message in normalized_messages[:-1])
 
-    if any(hint in text for hint in FOLLOW_UP_HINTS):
-        return False
-
     if not has_prior_assistant_reply:
         return True
+
+    if any(hint in text for hint in FOLLOW_UP_HINTS):
+        return False
 
     if any(hint in text for hint in RECIPE_HINTS):
         return True

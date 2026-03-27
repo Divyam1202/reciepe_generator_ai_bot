@@ -8,6 +8,8 @@ from .recipe_utils import strip_prompt_echo, validate_recipe_structure
 
 logger = logging.getLogger(__name__)
 MIN_GENERAL_RESPONSE_LENGTH = 5
+RECIPE_MAX_NEW_TOKENS = 900
+CHAT_MAX_NEW_TOKENS = 240
 
 
 def _render_fallback_chat_prompt(chat_messages: List[Dict[str, str]]) -> str:
@@ -63,6 +65,24 @@ def _is_valid_response(response_text: str, require_recipe: bool) -> bool:
     else:
         # For conversation, just require minimum length
         return len(stripped) >= MIN_GENERAL_RESPONSE_LENGTH
+
+
+def _get_generation_kwargs(tokenizer, require_recipe: bool) -> dict:
+    """Choose generation settings tuned for response type and latency."""
+    max_new_tokens = RECIPE_MAX_NEW_TOKENS if require_recipe else CHAT_MAX_NEW_TOKENS
+
+    return {
+        "max_new_tokens": max_new_tokens,
+        "temperature": 0.45 if require_recipe else 0.7,
+        "top_p": 0.9,
+        "do_sample": True,
+        "pad_token_id": tokenizer.eos_token_id,
+        "repetition_penalty": 1.15,
+        "length_penalty": 0.9 if require_recipe else 1.0,
+        "num_beams": 1,
+        "no_repeat_ngram_size": 2,
+        "use_cache": True,
+    }
 
 
 def generate_response(
@@ -121,19 +141,10 @@ def generate_response(
 
             # Generate response
             try:
-                with torch.no_grad():
+                with torch.inference_mode():
                     outputs = model.generate(
                         **inputs,
-                        max_new_tokens=2500,
-                        temperature=0.4,
-                        top_p=0.9,
-                        do_sample=True,
-                        pad_token_id=tokenizer.eos_token_id,
-                        repetition_penalty=1.2,
-                        length_penalty=0.8,
-                        num_beams=1,
-                        no_repeat_ngram_size=2,
-                        early_stopping=True,
+                        **_get_generation_kwargs(tokenizer, require_recipe),
                     )
             except torch.cuda.OutOfMemoryError as e:
                 logger.error("GPU out of memory on attempt %d", attempt + 1)

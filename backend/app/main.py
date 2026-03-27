@@ -1,10 +1,9 @@
 import logging
-import sys
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .model_loader import load_model
+from .model_loader import preload_model_in_background
 from .routes import router
 
 logger = logging.getLogger(__name__)
@@ -31,15 +30,10 @@ app.add_middleware(
 def startup():
     """Initialize on server startup."""
     logger.info("Starting Recipe AI server...")
-    
-    # Try to preload the model for faster first request
-    # But don't fail startup if model loading fails - it will load on first use
-    try:
-        load_model()
-        logger.info("Model preloaded successfully")
-    except Exception as exc:
-        logger.warning("Model preloading skipped during startup: %s", exc)
-        logger.info("Model will be loaded on first request")
+
+    # Warm the model without blocking API startup.
+    preload_model_in_background()
+    logger.info("Background model preload started")
 
 
 @app.get("/health")
