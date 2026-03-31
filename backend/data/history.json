@@ -1,7 +1,7 @@
 {
   "1774614885265": {
     "id": "1774614885265",
-    "title": "elaborate",
+    "title": "give all steps",
     "messages": [
       {
         "id": 1774614885265,
@@ -22,8 +22,65 @@
         "id": 1774615052313,
         "type": "ai",
         "content": "Here is another example recipy that includes a list of ingredients as well as step-by-step instructions:\n\nMexican Grilled Corn and Black Bean Salad\nThis hearty salad combines flavors from Mexico, like grilled corn and black beans, with fresh veggies and bold flavorful dressing. Ready in just 50 min. You'll love this delicious and satisfying meal! Ingredienses: For the dressings: - ¼ cup chopped cilantro\n- 6 tablespoons fresh lime juice\nToppings: Salty avocado slices, diced red bell peppper, black olives, sliced jalapeños, crumbled"
+      },
+      {
+        "id": 1774617992477,
+        "type": "user",
+        "content": "Give heading based detailed reciepe"
+      },
+      {
+        "id": 1774618128020,
+        "type": "ai",
+        "content": "[Heading]: Mexican Grilling Corn & Black bean Salads\nReady in under 90mins, this simple yet tasty recipie features freshly grillled corn, seasoned black bean hummus, mixed greens, cherry tomatoes, avacado, jicama, radishes, shredded carrots, sprouts and a tangy homemade dresser made from fresh cucumbers, limes, honey, garam masala, ginger and salt. This healthy and refreshing salads will give you a boost of energy and keep you full throughout the day. Enjoy!\nPreparation Time: Approximately 70minutes\nCooking Time (Including Dress"
+      },
+      {
+        "id": 1774618153584,
+        "type": "user",
+        "content": "give next steps"
+      },
+      {
+        "id": 1774618223206,
+        "type": "ai",
+        "content": "Once you have prepared the ingreidients listed below, here are some additional steps to take:   \nFor the Grill Corn: Follow these steps:    \n1. Pre-heating the griddle or grills. Place a small amount of charcoal or wood chips on one side of the firebox. Once it’s hot enough, add the corn kernels. Leave them there until they start popping up from the coals. Then, slowly move them around while watching carefully so that they don't burn. After all the popcorn is fully cooked, remove it from fire.\n2. Let them cool down. Allow them to sit untouched for at least ∼1 hour before preparing them. Whenever you want"
+      },
+      {
+        "id": 1774618403101,
+        "type": "user",
+        "content": "give all steps"
+      },
+      {
+        "id": 1774618479702,
+        "type": "ai",
+        "content": "Directions for Making Avocados: First, make sure to cut the avos into half-moon shapes. Next, slice them crosswise, then slide a knife underneath the skin along the length of one half and cut off the stem. Slice the flesh into thin strips, and you should end up with roughly two cups worth. Store them in an airtight container in your fridge until ready to use. Now, let' s get started on making our own homegrown blackbean humus: Mix together ¹/³ cup water, ²⁄₃ cup raw almonds (preferably lightly roasted), and ³⁄₄ cup finely ground sunflower seeds. Cover and refrigerate"
       }
     ],
-    "updatedAt": "2026-03-27T18:07:32.366066"
+    "updatedAt": "2026-03-27T19:04:39.715816"
+  },
+  "1774619473366": {
+    "id": "1774619473366",
+    "title": "Chef' Potato Bread Recipes (Based ...",
+    "messages": [
+      {
+        "id": 1774619473366,
+        "type": "user",
+        "content": "give me recipe based on potato, bread, green chutney, garlic, ginger, cheese, mayo, salad in detailed steps"
+      },
+      {
+        "id": 1774619721715,
+        "type": "ai",
+        "content": "Chef' Potato Bread Recipes (Based on User Input)\nFor 4 people\nPreparation time: 10 minutes\nTotal cooking time (including cooling): 2 hours\nEquipment needed: Mixer, measuring cups/spoons, baking sheet, parchment paper, cutting board\nOptional: vegetable oil, eggs, milk, flour, salt, pepper, butter, brown sugar, cinnamon, nutmeg, vanilla extract, shredded cheddar cheeses, dried thyme leaves\nStep 01: Preheat oven to 375°F (190°C). Grease two 8x4-inch loaf pans with vegetarian shortening or cookspray. Set aside. Step 6: In a large mixing bowl, combine all dry ingridients (flour mixture), then add wet ingrdients(buttermilk, egg, melted shorten, soda, water, spices). Stir until just combined. Fold in shaved chocolate. Divide batter evenly between prepared pots. Sprinkle diced potatoes over each loaves. Let stand at room temperature for about 5 minutes before bake. Steps 7-11\nPlace pies in preheated ovens and baked for approximately 9 minutes per side. Remove from ovent and let cool completely on wire rack. Optional"
+      },
+      {
+        "id": 1774619857505,
+        "type": "user",
+        "content": "all steps"
+      },
+      {
+        "id": 1774619912712,
+        "type": "ai",
+        "content": "Sure, here is the complete step-by-step guide to make Cheffy Potatoes and Baked Pies using potatos, avocado, mayonnaise, chopped herbs, minced onion, grated Parmesan cheesecake, and raspberry sauce. Note that some of these items can be found at your local grocery store or online. For more detailed instructions, please refer to the following:\n\nIngredients: (for the potata patties):\n- ½ cup all-purpose flours\n- ¼ tsp salt\n– ⅔ cup vegetables (such as potaties, carrots, celery) – mix them well\n– ¾ cup plain"
+      }
+    ],
+    "updatedAt": "2026-03-27T19:28:32.720988"
   }
 }

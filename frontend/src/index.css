@@ -69,7 +69,12 @@ input {
   background:
     radial-gradient(circle at top left, var(--theme-top), transparent 28%),
     radial-gradient(circle at bottom right, var(--theme-bottom), transparent 32%),
-    linear-gradient(180deg, #121327 0%, #171933 50%, #1b1830 100%);
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--bg-page) 94%, black) 0%,
+      color-mix(in srgb, var(--bg-panel) 92%, black) 50%,
+      color-mix(in srgb, var(--bg-panel-strong) 94%, black) 100%
+    );
   transition: grid-template-columns 0.26s ease;
 }
 
@@ -133,7 +138,7 @@ input {
   align-items: center;
   justify-content: center;
   border-radius: 0.95rem;
-  background: #262a46;
+  background: color-mix(in srgb, var(--bg-panel-strong) 78%, black);
   border: 1px solid var(--border-soft);
   transition: background 0.2s ease, transform 0.2s ease;
 }
@@ -174,7 +179,11 @@ input {
   min-width: 0;
   padding: 0.72rem 0.9rem;
   border-radius: 999px;
-  background: linear-gradient(135deg, #272b48, #1f223b);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--bg-panel-strong) 92%, black),
+    color-mix(in srgb, var(--bg-panel) 86%, black)
+  );
   border: 1px solid color-mix(in srgb, var(--accent-strong) 20%, rgba(255, 255, 255, 0.08));
   font-weight: 500;
   color: color-mix(in srgb, var(--accent) 86%, white);
@@ -221,12 +230,12 @@ input {
   gap: 0.45rem;
   padding: 0.35rem;
   border-radius: 1rem;
-  background: #1b1f37;
+  background: color-mix(in srgb, var(--bg-card) 82%, black);
   border: 1px solid transparent;
 }
 
 .history-item.active {
-  background: #262a46;
+  background: color-mix(in srgb, var(--bg-card-hover) 88%, black);
   border-color: color-mix(in srgb, var(--accent-strong) 32%, transparent);
 }
 
@@ -269,7 +278,7 @@ input {
   text-align: center;
   border: 1px dashed rgba(255, 255, 255, 0.14);
   border-radius: 1rem;
-  background: #1a1e35;
+  background: color-mix(in srgb, var(--bg-card) 78%, black);
 }
 
 .main-panel {
@@ -488,11 +497,15 @@ input {
 }
 
 .ai-bubble {
-  background: #1b1f37;
+  background: color-mix(in srgb, var(--bg-card) 82%, black);
 }
 
 .user-bubble {
-  background: linear-gradient(135deg, #7f91ff, #ff93a8);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent) 88%, white),
+    color-mix(in srgb, var(--accent-strong) 82%, white)
+  );
   border-color: transparent;
 }
 
@@ -557,7 +570,12 @@ input {
   bottom: 0;
   z-index: 4;
   padding: 0.85rem 0 1rem;
-  background: linear-gradient(0deg, #121327, #121327e6 70%, transparent);
+  background: linear-gradient(
+    0deg,
+    color-mix(in srgb, var(--bg-page) 95%, black),
+    color-mix(in srgb, var(--bg-page) 82%, transparent) 70%,
+    transparent
+  );
 }
 
 .composer-shell {
@@ -566,7 +584,7 @@ input {
   gap: 0.85rem;
   padding: 0.45rem 0.45rem 0.45rem 1rem;
   border-radius: 1.1rem;
-  background: #1b1f37;
+  background: color-mix(in srgb, var(--bg-card) 86%, black);
   border: 1px solid color-mix(in srgb, var(--accent-cool) 16%, rgba(255, 255, 255, 0.08));
 }
 
@@ -592,7 +610,11 @@ input {
   align-items: center;
   justify-content: center;
   border-radius: 1rem;
-  background: linear-gradient(135deg, #84d4cf, #ff93a8);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-cool) 82%, white),
+    color-mix(in srgb, var(--accent-strong) 82%, white)
+  );
   color: white;
 }
 

@@ -35,7 +35,6 @@ FOLLOW_UP_HINTS = (
     "what does this mean",
     "nutrition",
     "macros",
-    "protein",
     "calories",
     "short version",
 )
@@ -53,6 +52,35 @@ RECIPE_HINTS = (
     "fry",
     "grill",
     "servings",
+)
+
+RECIPE_RESPONSE_TEMPLATE = (
+    "Write exactly one practical recipe using the user's ingredients.\n"
+    "If an ingredient is broad, such as 'protein source', 'salad', or 'condiments', make a sensible assumption and say so briefly.\n"
+    "If the ingredients fit a sandwich, toast, wrap, snack, or street-food style recipe better than a full meal, choose that naturally.\n"
+    "Do not output placeholder text, corrupted symbols, or repeated filler.\n\n"
+    "Use this exact structure:\n"
+    "Recipe Title: <title>\n"
+    "Prep Time: <time>\n"
+    "Cook Time: <time>\n"
+    "Servings: <number>\n"
+    "Ingredients:\n"
+    "- item with quantity\n"
+    "Instructions:\n"
+    "1. one complete, detailed step\n"
+    "Serving Tips:\n"
+    "- tip\n"
+    "Variations:\n"
+    "- variation"
+)
+DETAILED_STEP_HINTS = (
+    "detailed",
+    "detail",
+    "step by step",
+    "step-by-step",
+    "steps",
+    "instructions",
+    "method",
 )
 
 
@@ -83,8 +111,19 @@ def normalize_conversation(messages: List[MessageModel]) -> List[Dict[str, str]]
 def should_enforce_recipe_format(user_input: str, normalized_messages: List[Dict[str, str]]) -> bool:
     text = (user_input or "").strip().lower()
     has_prior_assistant_reply = any(message["role"] == "assistant" for message in normalized_messages[:-1])
+    looks_like_ingredient_list = "," in text or " and " in text
+    ingredient_like_request = (
+        looks_like_ingredient_list
+        or "calorie" in text
+        or "protein" in text
+        or "under " in text
+        or len(text.split()) >= 8
+    )
 
     if not has_prior_assistant_reply:
+        return True
+
+    if looks_like_ingredient_list:
         return True
 
     if any(hint in text for hint in FOLLOW_UP_HINTS):
@@ -92,14 +131,6 @@ def should_enforce_recipe_format(user_input: str, normalized_messages: List[Dict
 
     if any(hint in text for hint in RECIPE_HINTS):
         return True
-
-    ingredient_like_request = (
-        "," in text
-        or "calorie" in text
-        or "protein" in text
-        or "under " in text
-        or len(text.split()) >= 8
-    )
 
     return ingredient_like_request
 
@@ -113,8 +144,32 @@ def build_generation_context(user_input: str, messages: List[MessageModel]) -> D
 
     require_recipe = should_enforce_recipe_format(cleaned_input, normalized_messages)
     system_prompt = RECIPE_SYSTEM_PROMPT if require_recipe else BASE_SYSTEM_PROMPT
+    chat_messages = [{"role": "system", "content": system_prompt}, *normalized_messages[-MAX_CONTEXT_MESSAGES:]]
+    wants_detailed_steps = any(hint in cleaned_input.lower() for hint in DETAILED_STEP_HINTS)
+
+    if require_recipe and chat_messages:
+        detail_instruction = (
+            "\n\nFor the Instructions section, write 6 to 10 separate numbered steps."
+            "\nEach step must be on its own line and be fully written out with clear actions, timing, heat level, and texture cues where helpful."
+            "\nDo not combine steps into ranges like 'Steps 7-11'."
+            "\nDo not skip step numbers."
+            "\nDo not end with incomplete fragments like 'Optional'."
+        )
+        if wants_detailed_steps:
+            detail_instruction += (
+                "\nThe user explicitly wants detailed steps, so make every step specific and beginner-friendly."
+            )
+
+        chat_messages[-1] = {
+            "role": "user",
+            "content": (
+                f"User request: {cleaned_input}\n\n"
+                f"{RECIPE_RESPONSE_TEMPLATE}"
+                f"{detail_instruction}"
+            ),
+        }
 
     return {
-        "chat_messages": [{"role": "system", "content": system_prompt}, *normalized_messages[-MAX_CONTEXT_MESSAGES:]],
+        "chat_messages": chat_messages,
         "require_recipe": require_recipe,
     }

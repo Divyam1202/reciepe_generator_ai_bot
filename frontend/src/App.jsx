@@ -4,6 +4,7 @@ import { apiCall } from "./api";
 
 const STORAGE_KEY = "chef-ai-history";
 const MOBILE_BREAKPOINT = 900;
+const DEFAULT_CHAT_TITLE = "New recipe chat";
 
 const SUGGESTIONS = [
   "chicken, garlic, onions, tomato",
@@ -21,172 +22,172 @@ const LOADER_TEXTS = [
 
 const TIME_THEMES = [
   {
-    bgPage: "#f5f0ff",
-    bgPanel: "#ffffff",
-    bgPanelStrong: "#f3ecff",
-    bgCard: "#f7f3ff",
-    bgCardHover: "#efe7ff",
-    navSurface: "#ede4ff",
-    navSurfaceStrong: "#e4d8ff",
-    textMain: "#2d2447",
-    textMuted: "#7d73a3",
-    borderSoft: "rgba(122, 99, 169, 0.16)",
-    borderStrong: "rgba(122, 99, 169, 0.26)",
-    accent: "#8d7cff",
-    accentStrong: "#ff8fa9",
-    accentCool: "#7ed8cf",
-    themeTop: "rgba(141, 124, 255, 0.18)",
-    themeBottom: "rgba(255, 143, 169, 0.14)",
-    themeCenter: "rgba(126, 216, 207, 0.05)",
-    glowWarm: "rgba(255, 143, 169, 0.08)",
-    glowCool: "rgba(126, 216, 207, 0.08)",
+    bgPage: "#fff2e8",
+    bgPanel: "#fff8f1",
+    bgPanelStrong: "#ffe5cf",
+    bgCard: "#fff0e2",
+    bgCardHover: "#ffe6d0",
+    navSurface: "#ffd2ae",
+    navSurfaceStrong: "#ffbe8b",
+    textMain: "#3b2314",
+    textMuted: "#8c6248",
+    borderSoft: "rgba(255, 109, 0, 0.16)",
+    borderStrong: "rgba(255, 109, 0, 0.28)",
+    accent: "#0d6efd",
+    accentStrong: "#ff6d00",
+    accentCool: "#16b7ff",
+    themeTop: "rgba(255, 109, 0, 0.22)",
+    themeBottom: "rgba(13, 110, 253, 0.14)",
+    themeCenter: "rgba(22, 183, 255, 0.08)",
+    glowWarm: "rgba(255, 109, 0, 0.11)",
+    glowCool: "rgba(22, 183, 255, 0.11)",
   },
   {
-    bgPage: "#efeaff",
-    bgPanel: "#faf7ff",
-    bgPanelStrong: "#eee7ff",
-    bgCard: "#f3edff",
-    bgCardHover: "#ebe3ff",
-    navSurface: "#e8defd",
-    navSurfaceStrong: "#ddd0fb",
-    textMain: "#30284b",
-    textMuted: "#7f77a0",
-    borderSoft: "rgba(111, 91, 160, 0.16)",
-    borderStrong: "rgba(111, 91, 160, 0.26)",
-    accent: "#8d7cff",
-    accentStrong: "#ff88a3",
-    accentCool: "#79d0c6",
-    themeTop: "rgba(141, 124, 255, 0.16)",
-    themeBottom: "rgba(255, 136, 163, 0.13)",
-    themeCenter: "rgba(121, 208, 198, 0.045)",
-    glowWarm: "rgba(255, 136, 163, 0.075)",
-    glowCool: "rgba(121, 208, 198, 0.075)",
+    bgPage: "#eef8ff",
+    bgPanel: "#f8fcff",
+    bgPanelStrong: "#d7efff",
+    bgCard: "#e6f6ff",
+    bgCardHover: "#d7eeff",
+    navSurface: "#c3e6ff",
+    navSurfaceStrong: "#a5d9ff",
+    textMain: "#0f2940",
+    textMuted: "#56758e",
+    borderSoft: "rgba(0, 170, 255, 0.16)",
+    borderStrong: "rgba(0, 170, 255, 0.28)",
+    accent: "#1597ff",
+    accentStrong: "#ff7a00",
+    accentCool: "#4cc9ff",
+    themeTop: "rgba(21, 151, 255, 0.2)",
+    themeBottom: "rgba(255, 122, 0, 0.12)",
+    themeCenter: "rgba(76, 201, 255, 0.08)",
+    glowWarm: "rgba(255, 122, 0, 0.09)",
+    glowCool: "rgba(76, 201, 255, 0.11)",
   },
   {
-    bgPage: "#e7e2fb",
-    bgPanel: "#f2edff",
-    bgPanelStrong: "#e5ddfb",
-    bgCard: "#ebe4ff",
-    bgCardHover: "#e0d8fb",
-    navSurface: "#ddd4f7",
-    navSurfaceStrong: "#d3c8f2",
-    textMain: "#332b4d",
-    textMuted: "#7b7398",
-    borderSoft: "rgba(94, 80, 139, 0.16)",
-    borderStrong: "rgba(94, 80, 139, 0.26)",
-    accent: "#8a79f0",
-    accentStrong: "#ff819d",
-    accentCool: "#70c8bf",
-    themeTop: "rgba(138, 121, 240, 0.15)",
-    themeBottom: "rgba(255, 129, 157, 0.12)",
-    themeCenter: "rgba(112, 200, 191, 0.04)",
-    glowWarm: "rgba(255, 129, 157, 0.07)",
-    glowCool: "rgba(112, 200, 191, 0.07)",
+    bgPage: "#fff1e4",
+    bgPanel: "#fff8f0",
+    bgPanelStrong: "#ffe1c2",
+    bgCard: "#ffe9d5",
+    bgCardHover: "#ffdcc0",
+    navSurface: "#ffcb97",
+    navSurfaceStrong: "#ffb468",
+    textMain: "#3d220b",
+    textMuted: "#8c613b",
+    borderSoft: "rgba(255, 123, 0, 0.17)",
+    borderStrong: "rgba(255, 123, 0, 0.3)",
+    accent: "#0ea5ff",
+    accentStrong: "#ff7b00",
+    accentCool: "#38bdf8",
+    themeTop: "rgba(255, 123, 0, 0.24)",
+    themeBottom: "rgba(14, 165, 255, 0.13)",
+    themeCenter: "rgba(56, 189, 248, 0.07)",
+    glowWarm: "rgba(255, 123, 0, 0.11)",
+    glowCool: "rgba(56, 189, 248, 0.1)",
   },
   {
-    bgPage: "#d9d3f0",
-    bgPanel: "#e7e1fa",
-    bgPanelStrong: "#d9d0f0",
-    bgCard: "#ddd5f4",
-    bgCardHover: "#d0c7e8",
-    navSurface: "#cfc4e7",
-    navSurfaceStrong: "#c1b3de",
-    textMain: "#342d4b",
-    textMuted: "#776f8f",
-    borderSoft: "rgba(83, 70, 122, 0.17)",
-    borderStrong: "rgba(83, 70, 122, 0.28)",
-    accent: "#8573df",
-    accentStrong: "#ff7a98",
-    accentCool: "#68beb5",
-    themeTop: "rgba(133, 115, 223, 0.14)",
-    themeBottom: "rgba(255, 122, 152, 0.11)",
-    themeCenter: "rgba(104, 190, 181, 0.035)",
-    glowWarm: "rgba(255, 122, 152, 0.065)",
-    glowCool: "rgba(104, 190, 181, 0.065)",
+    bgPage: "#e8f6ff",
+    bgPanel: "#f4fbff",
+    bgPanelStrong: "#d0edff",
+    bgCard: "#dcf3ff",
+    bgCardHover: "#c9ebff",
+    navSurface: "#b4e2ff",
+    navSurfaceStrong: "#8ed3ff",
+    textMain: "#0e2741",
+    textMuted: "#4f7290",
+    borderSoft: "rgba(34, 197, 255, 0.16)",
+    borderStrong: "rgba(34, 197, 255, 0.28)",
+    accent: "#22c5ff",
+    accentStrong: "#ff8a00",
+    accentCool: "#0f7fff",
+    themeTop: "rgba(34, 197, 255, 0.22)",
+    themeBottom: "rgba(255, 138, 0, 0.12)",
+    themeCenter: "rgba(15, 127, 255, 0.08)",
+    glowWarm: "rgba(255, 138, 0, 0.08)",
+    glowCool: "rgba(15, 127, 255, 0.11)",
   },
   {
-    bgPage: "#2a2440",
-    bgPanel: "#302947",
-    bgPanelStrong: "#37304f",
-    bgCard: "#3b3455",
-    bgCardHover: "#463e63",
-    navSurface: "#241f39",
-    navSurfaceStrong: "#1f1a31",
-    textMain: "#f4efff",
-    textMuted: "#b0a6cf",
-    borderSoft: "rgba(226, 215, 255, 0.12)",
-    borderStrong: "rgba(226, 215, 255, 0.22)",
-    accent: "#b9adff",
-    accentStrong: "#ff8ca8",
-    accentCool: "#7dd2c8",
-    themeTop: "rgba(185, 173, 255, 0.13)",
-    themeBottom: "rgba(255, 140, 168, 0.1)",
-    themeCenter: "rgba(125, 210, 200, 0.03)",
-    glowWarm: "rgba(255, 140, 168, 0.06)",
-    glowCool: "rgba(125, 210, 200, 0.055)",
+    bgPage: "#09111f",
+    bgPanel: "#0e1829",
+    bgPanelStrong: "#14223a",
+    bgCard: "#162640",
+    bgCardHover: "#1c3150",
+    navSurface: "#081424",
+    navSurfaceStrong: "#06101d",
+    textMain: "#eaf7ff",
+    textMuted: "#7ca0bb",
+    borderSoft: "rgba(0, 191, 255, 0.18)",
+    borderStrong: "rgba(0, 191, 255, 0.3)",
+    accent: "#22c5ff",
+    accentStrong: "#ff7a00",
+    accentCool: "#0ea5ff",
+    themeTop: "rgba(255, 122, 0, 0.18)",
+    themeBottom: "rgba(34, 197, 255, 0.16)",
+    themeCenter: "rgba(14, 165, 255, 0.08)",
+    glowWarm: "rgba(255, 122, 0, 0.1)",
+    glowCool: "rgba(14, 165, 255, 0.13)",
   },
   {
-    bgPage: "#211c35",
-    bgPanel: "#27213d",
-    bgPanelStrong: "#2d2644",
-    bgCard: "#322b4a",
-    bgCardHover: "#3a3155",
-    navSurface: "#1b172d",
-    navSurfaceStrong: "#171326",
-    textMain: "#f6f2ff",
-    textMuted: "#aba1ca",
-    borderSoft: "rgba(225, 216, 255, 0.11)",
-    borderStrong: "rgba(225, 216, 255, 0.2)",
-    accent: "#b7a8ff",
-    accentStrong: "#ff89a6",
-    accentCool: "#77c8c0",
-    themeTop: "rgba(183, 168, 255, 0.12)",
-    themeBottom: "rgba(255, 137, 166, 0.095)",
-    themeCenter: "rgba(119, 200, 192, 0.028)",
-    glowWarm: "rgba(255, 137, 166, 0.055)",
-    glowCool: "rgba(119, 200, 192, 0.05)",
+    bgPage: "#07101b",
+    bgPanel: "#0d1725",
+    bgPanelStrong: "#112033",
+    bgCard: "#15243a",
+    bgCardHover: "#1c2d47",
+    navSurface: "#08111d",
+    navSurfaceStrong: "#050d18",
+    textMain: "#edf7ff",
+    textMuted: "#8aa4ba",
+    borderSoft: "rgba(34, 197, 255, 0.16)",
+    borderStrong: "rgba(34, 197, 255, 0.26)",
+    accent: "#38bdf8",
+    accentStrong: "#ff8a00",
+    accentCool: "#60a5fa",
+    themeTop: "rgba(56, 189, 248, 0.14)",
+    themeBottom: "rgba(255, 138, 0, 0.14)",
+    themeCenter: "rgba(96, 165, 250, 0.08)",
+    glowWarm: "rgba(255, 138, 0, 0.09)",
+    glowCool: "rgba(96, 165, 250, 0.1)",
   },
   {
-    bgPage: "#181426",
-    bgPanel: "#1e1930",
-    bgPanelStrong: "#241d38",
-    bgCard: "#2a2240",
-    bgCardHover: "#31284a",
-    navSurface: "#141021",
-    navSurfaceStrong: "#100d1a",
-    textMain: "#f7f3ff",
-    textMuted: "#a69cc4",
-    borderSoft: "rgba(225, 216, 255, 0.1)",
-    borderStrong: "rgba(225, 216, 255, 0.18)",
-    accent: "#b19fff",
-    accentStrong: "#ff85a3",
-    accentCool: "#72c0b8",
-    themeTop: "rgba(177, 159, 255, 0.11)",
-    themeBottom: "rgba(255, 133, 163, 0.09)",
-    themeCenter: "rgba(114, 192, 184, 0.024)",
-    glowWarm: "rgba(255, 133, 163, 0.05)",
-    glowCool: "rgba(114, 192, 184, 0.045)",
+    bgPage: "#120d08",
+    bgPanel: "#1a120b",
+    bgPanelStrong: "#24180e",
+    bgCard: "#2b1d10",
+    bgCardHover: "#352414",
+    navSurface: "#140d07",
+    navSurfaceStrong: "#0e0804",
+    textMain: "#fff4eb",
+    textMuted: "#c19b82",
+    borderSoft: "rgba(255, 122, 0, 0.16)",
+    borderStrong: "rgba(255, 122, 0, 0.28)",
+    accent: "#ff8a00",
+    accentStrong: "#22c5ff",
+    accentCool: "#0ea5ff",
+    themeTop: "rgba(255, 122, 0, 0.18)",
+    themeBottom: "rgba(34, 197, 255, 0.12)",
+    themeCenter: "rgba(14, 165, 255, 0.07)",
+    glowWarm: "rgba(255, 122, 0, 0.11)",
+    glowCool: "rgba(14, 165, 255, 0.08)",
   },
   {
-    bgPage: "#100d18",
-    bgPanel: "#151120",
-    bgPanelStrong: "#1a1527",
-    bgCard: "#20192f",
-    bgCardHover: "#281f3a",
-    navSurface: "#0c0914",
-    navSurfaceStrong: "#08060f",
-    textMain: "#faf7ff",
-    textMuted: "#9d94ba",
-    borderSoft: "rgba(225, 216, 255, 0.09)",
-    borderStrong: "rgba(225, 216, 255, 0.16)",
-    accent: "#ad99ff",
-    accentStrong: "#ff7e9e",
-    accentCool: "#6cb8b0",
-    themeTop: "rgba(173, 153, 255, 0.1)",
-    themeBottom: "rgba(255, 126, 158, 0.085)",
-    themeCenter: "rgba(108, 184, 176, 0.02)",
-    glowWarm: "rgba(255, 126, 158, 0.045)",
-    glowCool: "rgba(108, 184, 176, 0.04)",
+    bgPage: "#08101c",
+    bgPanel: "#0d1626",
+    bgPanelStrong: "#12203a",
+    bgCard: "#172744",
+    bgCardHover: "#203258",
+    navSurface: "#070f1a",
+    navSurfaceStrong: "#050b14",
+    textMain: "#f3faff",
+    textMuted: "#8aa8c5",
+    borderSoft: "rgba(14, 165, 255, 0.15)",
+    borderStrong: "rgba(14, 165, 255, 0.26)",
+    accent: "#60a5fa",
+    accentStrong: "#ff7b00",
+    accentCool: "#22c5ff",
+    themeTop: "rgba(96, 165, 250, 0.16)",
+    themeBottom: "rgba(255, 123, 0, 0.11)",
+    themeCenter: "rgba(34, 197, 255, 0.07)",
+    glowWarm: "rgba(255, 123, 0, 0.08)",
+    glowCool: "rgba(34, 197, 255, 0.11)",
   },
 ];
 
@@ -194,8 +195,56 @@ const getTimeTheme = () => TIME_THEMES[Math.floor(new Date().getHours() / 3)];
 
 const createTitle = (text) => {
   const cleaned = text.replace(/\s+/g, " ").trim();
-  if (!cleaned) return "New recipe chat";
+  if (!cleaned) return DEFAULT_CHAT_TITLE;
   return cleaned.length > 34 ? `${cleaned.slice(0, 34)}...` : cleaned;
+};
+
+const isRecipeMetaLine = (line) =>
+  /^(prep time|cook time|servings|serves|yield|ingredients|instructions|method|directions|storage|variation|variations|serving tips)\b/i.test(
+    line,
+  );
+
+const cleanTitleCandidate = (line) =>
+  line
+    .replace(/^#{1,6}\s*/, "")
+    .replace(/^\*\*(.+)\*\*$/, "$1")
+    .replace(/^[*-]\s*/, "")
+    .trim();
+
+const extractRecipeTitle = (recipeText, fallbackTitle) => {
+  const lines = String(recipeText ?? "")
+    .split(/\r?\n/)
+    .map(cleanTitleCandidate)
+    .filter(Boolean);
+
+  for (let index = 0; index < Math.min(lines.length, 10); index += 1) {
+    const line = lines[index];
+    const inlineTitle = line.match(/^recipe title\s*:\s*(.+)$/i);
+
+    if (inlineTitle?.[1]) {
+      return createTitle(inlineTitle[1]);
+    }
+
+    if (/^recipe title\s*:?$/i.test(line)) {
+      const nextLine = lines
+        .slice(index + 1)
+        .find((candidate) => !isRecipeMetaLine(candidate) && candidate.length >= 4);
+
+      if (nextLine) {
+        return createTitle(nextLine);
+      }
+    }
+  }
+
+  const fallbackCandidate = lines.find(
+    (line) =>
+      line.length >= 4 &&
+      line.length <= 80 &&
+      !isRecipeMetaLine(line) &&
+      !/^recipe title\s*:?$/i.test(line),
+  );
+
+  return fallbackCandidate ? createTitle(fallbackCandidate) : fallbackTitle;
 };
 
 const formatTime = (timestamp) => {
@@ -219,7 +268,7 @@ const normalizeMessage = (message) => ({
 
 const normalizeConversation = (conversation) => ({
   id: String(conversation.id),
-  title: conversation.title || "New recipe chat",
+  title: conversation.title || DEFAULT_CHAT_TITLE,
   updatedAt: conversation.updatedAt ?? new Date().toISOString(),
   messages: Array.isArray(conversation.messages)
     ? conversation.messages.map(normalizeMessage)
@@ -379,7 +428,8 @@ export default function App() {
     return () => window.clearInterval(interval);
   }, []);
 
-  const syncConversation = (conversationId, nextMessages, fallbackTitle) => {
+  const syncConversation = (conversationId, nextMessages, nextTitle, options = {}) => {
+    const { forceTitleUpdate = false } = options;
     const timestamp = new Date().toISOString();
 
     setConversations((previous) => {
@@ -390,7 +440,7 @@ export default function App() {
         return [
           {
             id: normalizedId,
-            title: fallbackTitle,
+            title: nextTitle || DEFAULT_CHAT_TITLE,
             updatedAt: timestamp,
             messages: nextMessages,
           },
@@ -402,7 +452,10 @@ export default function App() {
         conversation.id === normalizedId
           ? {
               ...conversation,
-              title: fallbackTitle || conversation.title,
+              title:
+                forceTitleUpdate && nextTitle
+                  ? nextTitle
+                  : conversation.title || nextTitle || DEFAULT_CHAT_TITLE,
               updatedAt: timestamp,
               messages: nextMessages,
             }
@@ -493,6 +546,10 @@ export default function App() {
     if (!trimmedIngredients || loading) return;
 
     const conversationId = currentConversationId ?? String(Date.now());
+    const existingConversation = conversations.find(
+      (conversation) => conversation.id === String(conversationId),
+    );
+    const hadAssistantMessage = messages.some((message) => message.type === "ai");
     const timestamp = new Date().toISOString();
     const userMessage = {
       id: Date.now(),
@@ -502,14 +559,14 @@ export default function App() {
     };
 
     const nextMessages = [...messages, userMessage];
-    const title = createTitle(trimmedIngredients);
+    const draftTitle = existingConversation?.title || createTitle(trimmedIngredients);
 
     setCurrentConversationId(conversationId);
     setMessages(nextMessages);
     setIngredients("");
     setLoading(true);
     setError("");
-    syncConversation(conversationId, nextMessages, title);
+    syncConversation(conversationId, nextMessages, draftTitle);
 
     try {
       const data = await apiCall("/generate", {
@@ -517,7 +574,7 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ingredients: trimmedIngredients,
-          messages: buildConversationPayload(conversationId, title, nextMessages).messages,
+          messages: buildConversationPayload(conversationId, draftTitle, nextMessages).messages,
         }),
       });
 
@@ -529,13 +586,20 @@ export default function App() {
       };
 
       const updatedMessages = [...nextMessages, aiMessage];
+      const finalTitle =
+        hadAssistantMessage || existingConversation?.title
+          ? existingConversation?.title || draftTitle
+          : extractRecipeTitle(data.recipe, draftTitle);
+
       setMessages(updatedMessages);
-      syncConversation(conversationId, updatedMessages, title);
-      await saveConversationToBackend(conversationId, title, updatedMessages);
+      syncConversation(conversationId, updatedMessages, finalTitle, {
+        forceTitleUpdate: !hadAssistantMessage,
+      });
+      await saveConversationToBackend(conversationId, finalTitle, updatedMessages);
     } catch (requestError) {
       console.error("Recipe generation failed:", requestError);
       setError(requestError.message || "Unable to reach the backend right now.");
-      await saveConversationToBackend(conversationId, title, nextMessages);
+      await saveConversationToBackend(conversationId, draftTitle, nextMessages);
     } finally {
       setLoading(false);
     }
@@ -553,13 +617,13 @@ export default function App() {
     conversations.find((conversation) => conversation.id === currentConversationId)?.title;
 
   const themeStyle = {
-    "--bg-page": "#050505",
-    "--bg-panel": "#101014",
-    "--bg-panel-strong": "#15151c",
-    "--bg-card": "#181820",
-    "--bg-card-hover": "#20202a",
-    "--nav-surface": "#0d0d12",
-    "--nav-surface-strong": "#12121a",
+    "--bg-page": timeTheme.bgPage,
+    "--bg-panel": timeTheme.bgPanel,
+    "--bg-panel-strong": timeTheme.bgPanelStrong,
+    "--bg-card": timeTheme.bgCard,
+    "--bg-card-hover": timeTheme.bgCardHover,
+    "--nav-surface": timeTheme.navSurface,
+    "--nav-surface-strong": timeTheme.navSurfaceStrong,
     "--text-main": timeTheme.textMain,
     "--text-muted": timeTheme.textMuted,
     "--border-soft": timeTheme.borderSoft,
